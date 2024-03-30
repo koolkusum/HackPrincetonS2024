@@ -260,13 +260,16 @@ def extract_text_from_pdf(pdf_file):
 
 @app.route("/dashboard/")
 def dashboard():
-    card_data = [
-        {"title": "Card Title {}".format(i), 
-         "text": "Some example text for card {}".format(i),
-         "image": "https://picsum.photos/id/{}/350/150".format(random.randint(1, 100))
-        } for i in range(5)  # Generate 5 cards
-    ]
-    return render_template('dashboard.html', cards=card_data)
+    events = [
+    ["Event 1 - Mon", "Event 2 - Mon", "Event 4 - Mon"],  # Monday
+    ["Event 1 - Tue", "Event 2 - Tue"],                # Tuesday
+    ["Event 1 - Wed"],                                # Wednesday
+    ["Event 4 - Thu"],                                # Thursday
+    ["Event 1 - Fri", "Event 4 - Fri"],                # Friday
+    [],                                               # Saturday
+    []                                                # Sunday
+]
+    return render_template('dashboard.html', events=events)
 
 def generate_scheduling_query(tasks):
     
