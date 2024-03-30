@@ -41,15 +41,6 @@ oauth.register(
     client_kwargs={'scope': 'scope_required_by_provider'}
 )
 
-try:
-    api_key = os.getenv("GENAI_API_KEY")
-    if api_key:
-        genai_client = generative_models.GenerativeModelsServiceClient(api_key=api_key)
-    else:
-        print("GENAI_API_KEY environment variable is not set.")
-except Exception as e:
-    print("Error initializing GenAI client:", e)
-
 def get_db():
     client = pymongo.MongoClient(MONGODB_URI)
     db = client.get_default_database()  # Assuming your database name is provided in the MongoDB URI
