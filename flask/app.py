@@ -51,6 +51,48 @@ except Exception as e:
 def mainpage():
     return render_template("main.html")
 
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    auth_params = {"screen_hint": "signup"}
+    return oauth.create_client("oauthApp").authorize_redirect(redirect_uri=url_for('authorized', _external=True), **auth_params)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    return oauth.create_client("oauthApp").authorize_redirect(redirect_uri=url_for('authorized', _external=True))
+@app.route('/authorized')
+def authorized():
+    # token = oauth.oauthApp.
+    # oauth_token = token['access_token']
+    # session['oauth_token'] = oauth_token
+    # token = {
+    #     "token": session['oauth_token']
+    # }
+    # with open('token.json', 'w') as file:
+    #     file.write(json.dumps(token))
+    creds = None
+    if os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                if os.path.exists("token.json"):
+                    os.remove("token.json")
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port = 0)
+
+            with open("token.json", "w") as token:
+                token.write(creds.to_json())
+    
+    global user_logged_in
+    user_logged_in = True
+    return redirect(url_for('chatbot'))
+
 @app.route("/chatbot", methods=["GET", "POST"])
 def chatbot():
     if request.method == "POST":
