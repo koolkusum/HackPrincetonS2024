@@ -11,9 +11,13 @@
         <input type="file" name="pdf_file" accept=".pdf" required>
         <button type="submit">Upload</button>
     </form>
+    {% if current_pdf %}
+    <h2>Uploaded PDF</h2>
+    <iframe src="{{ url_for('show_pdf') }}" width="800" height="600"></iframe>
+    {% endif %}
 
     {% if formatted_message %}
-    <h2>Uploaded Text</h2>
+    <h2>Summarization:</h2>
     <p>{{ formatted_message | safe }}</p>
     {% endif %}
 </body>
