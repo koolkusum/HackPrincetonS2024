@@ -296,7 +296,7 @@ def generate_scheduling_query(tasks):
     All tasks should be scheduled on the same day, unless a user specifies otherwise in their request.
     Task Description: Provide a brief description of the task or event. For example:
 
-    Task Description: Meeting with client
+    Task Description: "Meeting with client"
     Scheduling Parameters: Consider the user's work-life balance and aim to schedule the event at an appropriate time. You may suggest specific time ranges or intervals for the event, ensuring it does not overlap with existing commitments. For instance:
     
     Start time: "YYYY-MM-DDTHH:MM"
@@ -403,14 +403,32 @@ def taskschedule():
                     start = event["start"].get("dateTime", event["start"].get("date"))
                     print(start, event["summary"])
 
+            # event = {
+            #     "summary": "My Python Event",
+            #     "location": "Somewhere Online",
+            #     "description": "",
+            #     "colorId": 6,
+            #     "start": {
+            #         "dateTime": "2024-02-11T09:00:00" + timeZone,
+            #     },
+
+            #     "end": {
+            #         "dateTime": "2024-02-11T17:00:00" + timeZone,
+            #     },
+            # }
+            # time.wait(5)
+
+            # event = service.events().insert(calendarId = "primary", body = event).execute()
+            # print(f"Event Created {event.get('htmlLink')}")
             print(schedule)
             for query in schedule:
                 print(query)
-                taskSummary = query['task'].replace('"', '')
-                print(taskSummary)
+            #     time.wait(5)
+                taskSummary = query['task']
                 taskStart = query['start_time']
                 taskEnd = query['end_time']
                 
+            #     # Add time zone offset to date-time strings (assuming they're in ET
                 
                 event = {
                     "summary": taskSummary,
@@ -419,11 +437,20 @@ def taskschedule():
                     "colorId": 6,
                     "start": {
                         "dateTime": taskStart + timeZone,
+                        # "timeZone": "Eastern Time"
                     },
 
                     "end": {
                         "dateTime": taskEnd + timeZone,
+                        # "timeZone": "Eastern Time"
                     },
+                    # "recurrence": [
+                    #     "RRULE: FREQ=DAILY;COUNT=3"
+                    # ],
+                    # "attendees": [
+                    #     {"email": "social@neuralnine.com"},
+                    #     {"email": "pedropa828@gmail.com"},
+                    # ]
                 }
 
 
@@ -436,6 +463,8 @@ def taskschedule():
         response = {
             "content": content
         }
+        #print(content)
+       # successString = "Tasks Successfully Added to Calendar"
         return jsonify({"message": "Tasks Successfully Added to Calendar"})    
     else:
         return render_template("taskschedule.html")
