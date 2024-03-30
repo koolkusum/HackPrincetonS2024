@@ -6,6 +6,9 @@ import os.path
 import json
 import PyPDF2
 import requests
+import textwrap
+from IPython.display import display
+from IPython.display import Markdown
 
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
@@ -96,37 +99,61 @@ def authorized():
     return redirect(url_for('chatbot'))
 
 @app.route("/chatbot", methods=["GET", "POST"])
-def chatbot():
-    if request.method == "POST":
-        if not request.form.get("message"):
-            return render_template("error.html")
+def talktoAI():
+    model = genai.GenerativeModel('models/gemini-pro')
+    if 'chat_history' not in session:
+        session['chat_history'] = []
 
-        userInput = request.form.get("message")
-        print("User Input:", userInput)
-        query = f"As a chatbot, your goal is to help with questions that only pertain into women in the field of STEM. The question the user wants to ask is {userInput}. Please answer the prompt not in markdown please."
-        model = genai.GenerativeModel('models/gemini-pro')
-        result = model.generate_content(query)
-        # print(result.text)
-        formatted_message = ""
-        lines = result.text.split("\n")
+    chat_history = session['chat_history']
 
-        for line in lines:
-            bold_text = ""
-            while "**" in line:
-                start_index = line.index("**")
-                end_index = line.index("**", start_index + 2)
-                bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
-                line = line[:start_index] + bold_text + line[end_index + 2:]
-            formatted_message += line + "<br>"
-        question_response = (userInput, formatted_message)
+    response = None
+    formatted_message = ""
 
-        print(question_response)
+    if request.method == 'POST':
+        user_message = request.form.get('message')
+        chat_history.append({'role': 'user', 'parts': [user_message]})
+        response = model.generate_content(chat_history)
+        chat_history.append({'role': 'model', 'parts': [response.text]})
+        session['chat_history'] = chat_history
+        if response:
+            lines = response.text.split("\n")
+            for line in lines:
+                bold_text = ""
+                while "**" in line:
+                    start_index = line.index("**")
+                    end_index = line.index("**", start_index + 2)
+                    bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
+                    line = line[:start_index] + bold_text + line[end_index + 2:]
+                formatted_message += line + "<br>"
+            # print(formatted_message)
 
-        return render_template("chatbot.html", question_response=question_response)
-    else:
-        question_response = ("", "")
-        return render_template("chatbot.html", question_response=question_response)
+    return render_template("chatbot.html", response=formatted_message)
 
+@app.route("/send-message", methods=['POST'])
+def send_message():
+    data = request.get_json()
+    user_message = data.get('message')
+
+    chat_history = data.get('chat_history', [])
+
+    chat_history.append({'role': 'user', 'parts': [user_message]})
+
+    model = genai.GenerativeModel('models/gemini-pro')
+    response = model.generate_content(chat_history)
+    bot_response = response.text
+    formatted_message = ""
+    lines = bot_response.split("\n")
+    for line in lines:
+        bold_text = ""
+        while "**" in line:
+            start_index = line.index("**")
+            end_index = line.index("**", start_index + 2)
+            bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
+            line = line[:start_index] + bold_text + line[end_index + 2:]
+        formatted_message += line + "<br>"
+    # print(formatted_message)
+    
+    return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
 @app.route("/upload")
 def index():

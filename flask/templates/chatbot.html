@@ -1,80 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <style>
-
-        @font-face{
-      
-          font-family: MyFont;
-      
-          src: url("My-Font.otf")format("opentype");
-      
-        } */
-      
-      
-      
-        {
-      
-          font-family: MyFont !important; 
-      
-      
-      }
-      #userInput, #botInput {
-            margin-bottom: 10px; /* Add a default margin-bottom */
-        }
-
-        .padded {
-            padding: 10px; /* Apply padding */
-        }
-      
-      </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Welcome to DRC Hack - Empowering Innovation">
-    <link rel="icon" type="image/png" href="/static/images/icon.png">
-    <link rel="stylesheet" href="../static/styles.css">
-    <link rel="stylesheet" href="../static/chatbot.css">
-    <title>HackPrinceton2024 - Chatbot</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <title>Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/chatbot.css"
+    <style>
+        
+    </style>
 </head>
 <body>
-    <header>
-    </header>
-    <h1><div class="chatbot-text">ChatBot </div> <div class="powered-by-text">Powered by Gemini AI by <b><span style="color: #4285F4;">G</span><span style="color: #DB4437">o</span><span style="color: #F4B400">o</span><span style="color: #4285F4;">g</span><span style="color: #0F9D58">l</span><span style="color: #DB4437">e</span></span></b></div></h1>
-    <div id="chatbot_area">
-        <div id="chatbot_area_chat">
-            <div id="chatbot_area_chat_container">
-                <div id="userInput">
-                    <p>{{ question_response[0] }}</p>
-                </div>
-            
-                <div id="botInput">
-                    {% autoescape off %}
-                    <p>
-                        {{ question_response[1] }}
-                    </p>
-                    {% endautoescape %}
-                </div>
-            </div>
+    <div class="main-content">
+        <div class="header--title">
+            <h1><div class="chatbot-text">ChatBot </div> <div class="powered-by-text">Powered by Gemini AI by <b><span style="color: #4285F4;">G</span><span style="color: #DB4437">o</span><span style="color: #F4B400">o</span><span style="color: #4285F4;">g</span><span style="color: #0F9D58">l</span><span style="color: #DB4437">e</span></span></b></div></h1>
         </div>
-        <form method = "post" form id="chatbot_area_textbox" >
-            <input type="text" id="message" placeholder="Talk to ChatBot" required minlength="1" name="message">
-            <button type="submit">↑</button>
+
+        <div class="messages" id="messages">
+        </div>
+
+        <form id="message-form" class="message-form">
+            <input type="text" id="user-input" class="message-input" placeholder="Type your message...">
+            <button type="submit" class="send-button">↑</button>
         </form>
     </div>
+
     <script>
-        // JavaScript code to add padding if the content is not empty
-        var userInputParagraph = document.querySelector('#userInput p');
-        var botInputParagraph = document.querySelector('#botInput p');
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById('message-form');
+            const userInput = document.getElementById('user-input');
+            const messagesDiv = document.getElementById('messages');
 
-        if (userInputParagraph.textContent.trim() !== '') {
-            userInputParagraph.classList.add('padded');
-        }
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); 
+                const userMessage = userInput.value.trim();
+                if (userMessage === '') return; 
+                displayMessage(userMessage, 'user-message');
+                fetch('/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userMessage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayMessage(data.message, 'bot-message');
+                    messagesDiv.dataset.chatHistory = JSON.stringify(data.chat_history);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+                userInput.value = '';
+            });
 
-        if (botInputParagraph.textContent.trim() !== '') {
-            botInputParagraph.classList.add('padded');
-        }
+            function displayMessage(message, className) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', className);
+                // Instead of setting textContent, set innerHTML to render HTML
+                messageDiv.innerHTML = message;
+                messagesDiv.appendChild(messageDiv);
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+
+            const initialChatHistory = JSON.parse(messagesDiv.dataset.chatHistory || '[]');
+
+            initialChatHistory.forEach(({ role, parts }) => {
+                // Instead of joining parts with space, render them individually
+                parts.forEach(part => displayMessage(part, role === 'user' ? 'user-message' : 'bot-message'));
+            });
+        });
     </script>
-
 </body>
 </html>
