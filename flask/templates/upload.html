@@ -16,6 +16,8 @@
     <iframe src="{{ url_for('show_pdf') }}" width="800" height="600"></iframe>
     {% endif %}
 
+
+
     {% if formatted_message %}
     <h2>Summarization:</h2>
     <p>{{ formatted_message | safe }}</p>

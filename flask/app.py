@@ -14,6 +14,8 @@ from flask import Flask, jsonify, render_template, redirect, request, session, u
 from datetime import datetime, timezone
 import datetime as dt
 from authlib.integrations.flask_client import OAuth
+import uuid
+
 
 import google.generativeai as genai
 from google.auth import load_credentials_from_file
@@ -24,7 +26,8 @@ from google.generativeai import generative_models
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
 
 app = Flask(__name__)
 app.secret_key = urandom(24)
@@ -155,6 +158,43 @@ def send_message():
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
+def create_presentation():
+    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    service = build("slides", "v1", credentials=creds)
+
+    presentation = service.presentations().create(
+        body={'title': 'My Presentation'}).execute()
+    presentation_id = presentation.get('presentationId')
+
+    # Define the slides content
+    slides_content = [
+        {'title': 'My Name', 'content': 'Your Name Here'},
+        {'title': 'Where I Am From', 'content': 'Your Location Here'}
+    ]
+
+    # Create slides
+    requests = []
+    for slide_content in slides_content:
+        slide = service.presentations().pages().batchUpdate(
+            presentationId=presentation_id,
+            body={'title': slide_content['title'], 'elementProperties': {'pageObjectId': ''}},
+        ).execute()
+
+        # Insert text into slides
+        requests.append({
+            'insertText': {
+                'objectId': slide['objectId'],
+                'text': slide_content['content'],
+            }
+        })
+
+    # Execute batch requests to insert text
+    batch_update_body = {
+        'requests': requests
+    }
+    service.presentations().batchUpdate(
+        presentationId=presentation_id, body=batch_update_body).execute()
+
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     if request.method == "POST":
@@ -168,12 +208,12 @@ def upload():
 
         if pdf_file:
             pdf_text = extract_text_from_pdf(pdf_file)
-            query = "As a chatbot, your goal is to summarize the following text from a PDF in a format that is easily digestible for a college student. Try to keep it as concise as possible: " + pdf_text
+            query = "As a chatbot, your goal is to summarize the following text from a PDF in a format that is easily digestible for a college student. Try to keep it as concise as possible can: " + pdf_text
             model = genai.GenerativeModel('models/gemini-pro')
             result = model.generate_content(query)
             formatted_message = ""
             lines = result.text.split("\n")
-
+            print(result.text)
             for line in lines:
                 bold_text = ""
                 while "**" in line:
@@ -182,10 +222,13 @@ def upload():
                     bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
                     line = line[:start_index] + bold_text + line[end_index + 2:]
                 formatted_message += line + "<br>"
-
+            print(formatted_message)
             # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+            presentation_id = create_presentation()
+
 
             pdf_path = "uploaded.pdf"
             pdf_file.save(pdf_path)
