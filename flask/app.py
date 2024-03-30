@@ -1,4 +1,3 @@
-import os
 from os import urandom
 from dotenv import load_dotenv
 import os.path
