@@ -16,6 +16,11 @@
     <iframe src="{{ url_for('show_pdf') }}" width="800" height="600"></iframe>
     {% endif %}
 
+    {% if presentation_id %}
+    <h2>Slides:</h2>
+    <iframe src="https://docs.google.com/presentation/d/{{ presentation_id }}/embed?start=false&loop=false&delayms=3000" frameborder="0" width="800" height="600" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+    {% endif %}
+
     {% if formatted_message %}
     <h2>Summarization:</h2>
     <p>{{ formatted_message | safe }}</p>

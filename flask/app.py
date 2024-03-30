@@ -24,7 +24,8 @@ from google.generativeai import generative_models
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
 
 app = Flask(__name__)
 app.secret_key = urandom(24)
@@ -155,6 +156,43 @@ def send_message():
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
+def create_presentation(formatted_message):
+    # Load credentials from file
+    # creds = Credentials.from_authorized_user_file("token.json")
+    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
+    # Build the Google Slides service
+    service = build("slides", "v1", credentials=creds)
+
+    # Create a new presentation
+    presentation = service.presentations().create(body={"title": "Formatted Message"}).execute()
+    presentation_id = presentation["presentationId"]
+
+    # Add slides with the formatted message
+    requests = []
+    slide_texts = formatted_message.split("<br>")
+    for text in slide_texts:
+        create_slide_request = service.presentations().slides().create(
+            presentationId=presentation_id,
+            body={"slideLayoutReference": {"predefinedLayout": "TITLE_AND_BODY"}}
+        )
+        create_slide_response = create_slide_request.execute()
+        slide_id = create_slide_response["objectId"]
+
+        requests.append({
+            "insertText": {
+                "objectId": slide_id,
+                "text": text,
+            }
+        })
+
+    # Execute the batch update request to add slides
+    body = {"requests": requests}
+    response = service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute()
+
+    return presentation_id
+
+
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     if request.method == "POST":
@@ -186,6 +224,7 @@ def upload():
             # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            presentation_id = create_presentation(formatted_message)
 
             pdf_path = "uploaded.pdf"
             pdf_file.save(pdf_path)
@@ -195,7 +234,7 @@ def upload():
             # Set the current_pdf variable to True to indicate that a PDF has been uploaded
             session['current_pdf'] = True
 
-            return render_template("upload.html", formatted_message=formatted_message, current_pdf=True)
+            return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, presentation_id=presentation_id)
 
     return render_template("upload.html")
 
