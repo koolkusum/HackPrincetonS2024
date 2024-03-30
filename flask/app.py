@@ -56,11 +56,9 @@ def get_db():
     db = client.get_default_database()  # Assuming your database name is provided in the MongoDB URI
     return db
 
-
 @app.route("/")
 def mainpage():
     return render_template("main.html")
-
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -70,6 +68,7 @@ def signup():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     return oauth.create_client("oauthApp").authorize_redirect(redirect_uri=url_for('authorized', _external=True))
+
 @app.route('/authorized')
 def authorized():
     # token = oauth.oauthApp.
