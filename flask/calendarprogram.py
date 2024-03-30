@@ -12,7 +12,6 @@ import time
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 
 def addSchedule(name, description, location, date, startTime, endTime):
-    print("hi")
     local_time = dt.datetime.now()
     local_timezone = dt.datetime.now(dt.timezone.utc).astimezone().tzinfo
     current_time = dt.datetime.now(local_timezone)
@@ -20,7 +19,6 @@ def addSchedule(name, description, location, date, startTime, endTime):
     offset_string = list(timezone_offset)
     offset_string.insert(3, ':')
     timeZone = "".join(offset_string)
-    print(timeZone)
     creds = None
 
     if os.path.exists("token.json"):
@@ -49,13 +47,6 @@ def addSchedule(name, description, location, date, startTime, endTime):
             for event in events:
                 start = event["start"].get("dateTime", event["start"].get("date"))
                 print(start, event["summary"])
-        print(name)
-        print(description)
-        print(location)
-        print(date)
-        print(startTime)
-        print(endTime)
-        print(timeZone)
 
         event = {
             "summary": name,
