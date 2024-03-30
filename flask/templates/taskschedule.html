@@ -7,17 +7,29 @@
     <title>User Tasks</title>
     <link href="https://fonts.googleapis.com/css2?family=Protest+Riot:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            border: none;
+        }
         #taskInput,
         #taskList {
-            width: 100%;
+            width: 50%;
+            text-align: center;
             display: flex;
             border-radius: 5px;
             margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #taskList {
+            display: flex;
+            justify-content: center;
         }
         #taskInput button {
             margin-right: auto;
+            font-size: 25px ;
             background-color: #dc3545;
-            border-radius: 5px;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
             margin-left: 5px;
             color: white;
             border: none;
@@ -41,23 +53,29 @@
         }
 
         .delete-btn:hover {
-            color: white;
-            background-color: #dc3545;
+            color: #353535;
+            cursor: pointer;
         }
 
         .delete-btn:focus {
             outline: none;
         }
-
+        .list-group-item {
+            padding-left: 15px;
+            color: white;
+        }
         .list-group-item:hover {
-            background-color: #cce5ff !important;
+            background-color: white !important;
+            color: #353535;
         }
 
         .list-group-item .delete-btn:hover ~ * {
             background-color: transparent !important;
         }
-
-        /* Center the title */
+        .list-group {
+            text-align: center;
+            width: 100%;
+        }
         .title {
             text-align: center;
             font-family: sans-serif;
@@ -78,30 +96,50 @@
             width: 100%;
             max-width: 300px;
             margin: 0 auto;
+            border-radius: 5px;
             display: block;
+            background-color: white;            
+            transition: 0.5s ease-in;
+            color: black;
+            cursor: pointer;
         }
-
+        #submitBtn button:hover {
+            background-color: #d66a75;
+            color: white;
+            transition: 0.5s;
+        }
         #task {
             margin-left: auto;
             height: 50px;
             width: 80%;
+            text-align: center;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            font-size: 25px;
+        }
+        
+        ul.list-group {
+            text-align: center;
         }
 
         body {
-            background-image: url("/static/images/work.jpg");
+            /* background-image: url("/static/images/work.jpg");
+             */
+             background-color: #353535;
             background-size: cover;
             background-repeat: no-repeat;
             color: white;
         }
+        .
     </style>
 </head>
 <body>
 
     <div class="container mt-4">
-        <h2 class="title">Your Tasks</h2>
+        <h2 class="title">YOUR TASKS</h2>
         <div id="taskInput" class="input-group mb-3">
             <input type="text" id="task" class="form-control" placeholder="Enter your task">
-            <button class="btn btn-primary" type="button" onclick="addTask()">Add Task</button>
+            <button class="btn btn-primary" type="button" onclick="addTask()">Add</button>
         </div>
         <div id="taskList">
             <ul id="list" class="list-group" ondrop="drop(event)" ondragover="allowDrop(event)"></ul>
