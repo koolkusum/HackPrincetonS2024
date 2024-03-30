@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os.path
 import json
 import PyPDF2
+import pymongo
 import requests
 
 # Third-Party Imports
