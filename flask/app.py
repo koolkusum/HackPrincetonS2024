@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os.path
 import json
 import PyPDF2
+import requests
 
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
