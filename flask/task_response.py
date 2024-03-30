@@ -247,7 +247,7 @@ async def todaytask(message : discord.message.Message, client : discord.Client, 
             discord_id = str(message.author.id)    
             tasks_names = userDatabase.get_task_names_by_id(discord_id)
             for event in events:
-                event_name = event['summary']
+                event_name = event['summary'].replace('"', '')
                 event_start = event['start']['dateTime'][:19]
                 event_end = event['end']['dateTime'][:19]       
                 if event_name not in tasks_names:
@@ -314,7 +314,7 @@ async def alltask(message : discord.message.Message, client : discord.Client, us
             discord_id = str(message.author.id)    
             tasks_names = userDatabase.get_task_names_by_id(discord_id)
             for event in events:
-                event_name = event['summary']
+                event_name = event['summary'].replace('"', '')
                 event_start = event['start']['dateTime'][:19]
                 event_end = event['end']['dateTime'][:19]       
                 if event_name not in tasks_names:
@@ -389,7 +389,7 @@ async def removetask(message : discord.message.Message, client : discord.Client,
             discord_id = str(message.author.id)    
             tasks_names = userDatabase.get_task_names_by_id(discord_id)
             for event in events:
-                event_name = event['summary']
+                event_name = event['summary'].replace('"', '')
                 event_start = event['start']['dateTime'][:19]
                 event_end = event['end']['dateTime'][:19]       
                 if event_name not in tasks_names:

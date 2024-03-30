@@ -4,6 +4,7 @@ import time
 import os
 import tracker as htm
 
+
 brushThickness = 15
 eraserThickness = 100
 
@@ -91,6 +92,7 @@ while True:
 
     # Display the images
     cv2.imshow("Image", img)
-    cv2.imshow("Canvas", imgCanvas)
+    #cv2.imshow("Canvas", imgCanvas)
+    # Wait for the user to close the window
     cv2.waitKey(1)
-        
+    
