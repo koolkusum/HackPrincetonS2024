@@ -5,16 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/images/icon.png">
     <title>User Tasks</title>
-    <!-- Import Protest Riot font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Protest+Riot:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Add custom styles if needed */
-        /* Adjustments to match Bootstrap styling */
         #taskInput,
         #taskList {
+            width: 100%;
+            display: flex;
+            border-radius: 5px;
             margin-bottom: 20px;
         }
-
+        #taskInput button {
+            margin-right: auto;
+            background-color: #dc3545;
+            border-radius: 5px;
+            margin-left: 5px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
         .list-group-item {
             cursor: move;
             display: flex;
@@ -25,27 +33,26 @@
 
         .delete-btn {
             color: #dc3545;
-            font-size: 1.5rem; /* Increase delete button size */
+            font-size: 1.5rem;
             background-color: transparent;
             border: none;
             margin-left: auto;
-            padding: 0.5rem; /* Increase padding for button */
+            padding: 0.5rem;
         }
 
         .delete-btn:hover {
             color: white;
-            background-color: #dc3545; /* Change background color of delete button on hover */
+            background-color: #dc3545;
         }
 
         .delete-btn:focus {
-            outline: none; /* Remove outline when delete button is focused */
+            outline: none;
         }
 
         .list-group-item:hover {
-            background-color: #cce5ff !important; /* Change background color of list group item on hover */
+            background-color: #cce5ff !important;
         }
 
-        /* Highlight list group item only when hovering over delete button */
         .list-group-item .delete-btn:hover ~ * {
             background-color: transparent !important;
         }
@@ -54,38 +61,37 @@
         .title {
             text-align: center;
             font-family: sans-serif;
-            font-size: 75px; /* Increase font size */
+            font-size: 75px;
             margin-bottom: 50px;
             margin-top: 60px;
             color: white;
         }
 
-        /* Style the Submit Tasks button */
         #submitBtn {
             text-align: center;
         }
 
         #submitBtn button {
-            font-family: sans-serif; /* Set font to Protest Riot */
-            font-size: 30px; /* Increase font size */
+            font-family: sans-serif;
+            font-size: 30px;
             height: 110%;
-            width: 100%; /* Make button full width */
-            max-width: 300px; /* Limit button width */
-            margin: 0 auto; /* Center button */
-            display: block; /* Ensure button is block-level element */
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
         }
 
-        /* Increase height of input box */
         #task {
-            height: 50px; /* Set desired height */
+            margin-left: auto;
+            height: 50px;
+            width: 80%;
         }
 
-        /* Set background image */
         body {
             background-image: url("/static/images/work.jpg");
             background-size: cover;
             background-repeat: no-repeat;
-            color: white; /* Set text color to white */
+            color: white;
         }
     </style>
 </head>

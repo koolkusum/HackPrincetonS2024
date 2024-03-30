@@ -19,7 +19,7 @@ async def adduser(message : discord.message.Message, client : discord.Client, us
         embed.set_footer(text="!adduser")
         await message.channel.send(file=file, embed=embed)
     else:
-        embed = discord.Embed(title = f'What time do you want GreenHabits-Bot to message you?', description='Please enter your prefered time in **military time format**.', color=0xFF5733)
+        embed = discord.Embed(title = f'What time do you want HackPrinceton2024-Bot to message you?', description='Please enter your prefered time in **military time format**.', color=0xFF5733)
         file = discord.File('static/Images/icon.png', filename='icon.png')
         embed.set_thumbnail(url='attachment://icon.png')
         embed.set_author(name="GreenHabits-Bot says:")
