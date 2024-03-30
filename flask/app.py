@@ -6,9 +6,6 @@ import os.path
 import json
 import PyPDF2
 import requests
-import textwrap
-from IPython.display import display
-from IPython.display import Markdown
 
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
@@ -32,6 +29,8 @@ app.secret_key = urandom(24)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 load_dotenv()
+MONGODB_URI = os.getenv("MONGODB_URL")
+
 oauth = OAuth(app)
 oauth.register(
     "oauthApp",
@@ -51,6 +50,12 @@ try:
         print("GENAI_API_KEY environment variable is not set.")
 except Exception as e:
     print("Error initializing GenAI client:", e)
+
+def get_db():
+    client = pymongo.MongoClient(MONGODB_URI)
+    db = client.get_default_database()  # Assuming your database name is provided in the MongoDB URI
+    return db
+
 
 @app.route("/")
 def mainpage():
@@ -173,8 +178,20 @@ def upload_pdf():
         query = "As a chatbot, your goal is to summarize the the following text from a pdf in a format that easiliy digestible for a college student. Try to keep it as concise as possible: " + pdf_text
         model = genai.GenerativeModel('models/gemini-pro')
         result = model.generate_content(query)
+        formatted_message = ""
+        lines = result.text.split("\n")
+
+        for line in lines:
+            bold_text = ""
+            while "**" in line:
+                start_index = line.index("**")
+                end_index = line.index("**", start_index + 2)
+                bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
+                line = line[:start_index] + bold_text + line[end_index + 2:]
+            formatted_message += line + "<br>"
+        print(formatted_message)
         print(result.text)
-        return result.text
+        return formatted_message
 
 def extract_text_from_pdf(pdf_file):
     pdf_reader = PyPDF2.PdfReader(pdf_file)
