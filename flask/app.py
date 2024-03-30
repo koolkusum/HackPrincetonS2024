@@ -6,6 +6,7 @@ import PyPDF2
 import pymongo
 import requests
 from flask import send_file
+from flask import send_from_directory
 from werkzeug.utils import secure_filename
 
 
@@ -161,42 +162,6 @@ def send_message():
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
-def create_presentation():
-    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    service = build("slides", "v1", credentials=creds)
-
-    presentation = service.presentations().create(
-        body={'title': 'My Presentation'}).execute()
-    presentation_id = presentation.get('presentationId')
-
-    # Define the slides content
-    slides_content = [
-        {'title': 'My Name', 'content': 'Your Name Here'},
-        {'title': 'Where I Am From', 'content': 'Your Location Here'}
-    ]
-
-    # Create slides
-    requests = []
-    for slide_content in slides_content:
-        slide = service.presentations().pages().batchUpdate(
-            presentationId=presentation_id,
-            body={'title': slide_content['title'], 'elementProperties': {'pageObjectId': ''}},
-        ).execute()
-
-        # Insert text into slides
-        requests.append({
-            'insertText': {
-                'objectId': slide['objectId'],
-                'text': slide_content['content'],
-            }
-        })
-
-    # Execute batch requests to insert text
-    batch_update_body = {
-        'requests': requests
-    }
-    service.presentations().batchUpdate(
-        presentationId=presentation_id, body=batch_update_body).execute()
 
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
@@ -229,28 +194,29 @@ def upload():
             # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(filepath)
 
-            presentation_id = create_presentation()
-
-
-            pdf_path = "uploaded.pdf"
-            pdf_file.save(pdf_path)
             pdf_file.save(filepath)
             session['current_filename'] = filename  # Save the current filename in the session
 
             # Set the current_pdf variable to True to indicate that a PDF has been uploaded
             session['current_pdf'] = True
 
-            return render_template("upload.html", formatted_message=formatted_message, current_pdf=True)
+            return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, filename=filename)
 
     return render_template("upload.html")
+
 
 @app.route("/show_pdf")
 def show_pdf():
     if 'current_filename' in session:
         filename = session['current_filename']
-        return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        print(filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print (filepath)
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     return "No PDF uploaded"
+
 
 def extract_text_from_pdf(pdf_file):
     pdf_reader = PyPDF2.PdfReader(pdf_file)
