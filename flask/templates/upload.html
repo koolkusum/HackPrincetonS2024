@@ -7,9 +7,14 @@
 </head>
 <body>
     <h1>Upload a PDF</h1>
-    <form action="/upload_pdf" method="post" enctype="multipart/form-data">
+    <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="pdf_file" accept=".pdf" required>
         <button type="submit">Upload</button>
     </form>
+
+    {% if formatted_message %}
+    <h2>Uploaded Text</h2>
+    <p>{{ formatted_message | safe }}</p>
+    {% endif %}
 </body>
 </html>
