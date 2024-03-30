@@ -1,4 +1,3 @@
-import os
 from os import urandom
 import random
 from dotenv import load_dotenv
@@ -15,6 +14,8 @@ from flask import Flask, jsonify, render_template, redirect, request, session, u
 from datetime import datetime, timezone
 import datetime as dt
 from authlib.integrations.flask_client import OAuth
+import uuid
+
 
 import google.generativeai as genai
 from google.auth import load_credentials_from_file
@@ -158,42 +159,42 @@ def send_message():
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
-def create_presentation(formatted_message):
-    # Load credentials from file
-    # creds = Credentials.from_authorized_user_file("token.json")
+def create_presentation():
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-
-    # Build the Google Slides service
     service = build("slides", "v1", credentials=creds)
 
-    # Create a new presentation
-    presentation = service.presentations().create(body={"title": "Formatted Message"}).execute()
-    presentation_id = presentation["presentationId"]
+    presentation = service.presentations().create(
+        body={'title': 'My Presentation'}).execute()
+    presentation_id = presentation.get('presentationId')
 
-    # Add slides with the formatted message
+    # Define the slides content
+    slides_content = [
+        {'title': 'My Name', 'content': 'Your Name Here'},
+        {'title': 'Where I Am From', 'content': 'Your Location Here'}
+    ]
+
+    # Create slides
     requests = []
-    slide_texts = formatted_message.split("<br>")
-    for text in slide_texts:
-        create_slide_request = service.presentations().slides().create(
+    for slide_content in slides_content:
+        slide = service.presentations().pages().batchUpdate(
             presentationId=presentation_id,
-            body={"slideLayoutReference": {"predefinedLayout": "TITLE_AND_BODY"}}
-        )
-        create_slide_response = create_slide_request.execute()
-        slide_id = create_slide_response["objectId"]
+            body={'title': slide_content['title'], 'elementProperties': {'pageObjectId': ''}},
+        ).execute()
 
+        # Insert text into slides
         requests.append({
-            "insertText": {
-                "objectId": slide_id,
-                "text": text,
+            'insertText': {
+                'objectId': slide['objectId'],
+                'text': slide_content['content'],
             }
         })
 
-    # Execute the batch update request to add slides
-    body = {"requests": requests}
-    response = service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute()
-
-    return presentation_id
-
+    # Execute batch requests to insert text
+    batch_update_body = {
+        'requests': requests
+    }
+    service.presentations().batchUpdate(
+        presentationId=presentation_id, body=batch_update_body).execute()
 
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
@@ -208,12 +209,12 @@ def upload():
 
         if pdf_file:
             pdf_text = extract_text_from_pdf(pdf_file)
-            query = "As a chatbot, your goal is to summarize the following text from a PDF in a format that is easily digestible for a college student. Try to keep it as concise as possible: " + pdf_text
+            query = "As a chatbot, your goal is to summarize the following text from a PDF in a format that is easily digestible for a college student. Try to keep it as concise as possible can: " + pdf_text
             model = genai.GenerativeModel('models/gemini-pro')
             result = model.generate_content(query)
             formatted_message = ""
             lines = result.text.split("\n")
-
+            print(result.text)
             for line in lines:
                 bold_text = ""
                 while "**" in line:
@@ -222,11 +223,13 @@ def upload():
                     bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
                     line = line[:start_index] + bold_text + line[end_index + 2:]
                 formatted_message += line + "<br>"
-
+            print(formatted_message)
             # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            presentation_id = create_presentation(formatted_message)
+
+            presentation_id = create_presentation()
+
 
             pdf_path = "uploaded.pdf"
             pdf_file.save(pdf_path)
@@ -236,7 +239,7 @@ def upload():
             # Set the current_pdf variable to True to indicate that a PDF has been uploaded
             session['current_pdf'] = True
 
-            return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, presentation_id=presentation_id)
+            return render_template("upload.html", formatted_message=formatted_message, current_pdf=True)
 
     return render_template("upload.html")
 
@@ -282,7 +285,7 @@ def generate_scheduling_query(tasks):
     All tasks should be scheduled on the same day, unless a user specifies otherwise in their request.
     Task Description: Provide a brief description of the task or event. For example:
 
-    Task Description: "Meeting with client"
+    Task Description: Meeting with client
     Scheduling Parameters: Consider the user's work-life balance and aim to schedule the event at an appropriate time. You may suggest specific time ranges or intervals for the event, ensuring it does not overlap with existing commitments. For instance:
     
     Start time: "YYYY-MM-DDTHH:MM"
@@ -389,32 +392,14 @@ def taskschedule():
                     start = event["start"].get("dateTime", event["start"].get("date"))
                     print(start, event["summary"])
 
-            # event = {
-            #     "summary": "My Python Event",
-            #     "location": "Somewhere Online",
-            #     "description": "",
-            #     "colorId": 6,
-            #     "start": {
-            #         "dateTime": "2024-02-11T09:00:00" + timeZone,
-            #     },
-
-            #     "end": {
-            #         "dateTime": "2024-02-11T17:00:00" + timeZone,
-            #     },
-            # }
-            # time.wait(5)
-
-            # event = service.events().insert(calendarId = "primary", body = event).execute()
-            # print(f"Event Created {event.get('htmlLink')}")
             print(schedule)
             for query in schedule:
                 print(query)
-            #     time.wait(5)
-                taskSummary = query['task']
+                taskSummary = query['task'].replace('"', '')
+                print(taskSummary)
                 taskStart = query['start_time']
                 taskEnd = query['end_time']
                 
-            #     # Add time zone offset to date-time strings (assuming they're in ET
                 
                 event = {
                     "summary": taskSummary,
@@ -423,20 +408,11 @@ def taskschedule():
                     "colorId": 6,
                     "start": {
                         "dateTime": taskStart + timeZone,
-                        # "timeZone": "Eastern Time"
                     },
 
                     "end": {
                         "dateTime": taskEnd + timeZone,
-                        # "timeZone": "Eastern Time"
                     },
-                    # "recurrence": [
-                    #     "RRULE: FREQ=DAILY;COUNT=3"
-                    # ],
-                    # "attendees": [
-                    #     {"email": "social@neuralnine.com"},
-                    #     {"email": "pedropa828@gmail.com"},
-                    # ]
                 }
 
 
@@ -449,8 +425,6 @@ def taskschedule():
         response = {
             "content": content
         }
-        #print(content)
-       # successString = "Tasks Successfully Added to Calendar"
         return jsonify({"message": "Tasks Successfully Added to Calendar"})    
     else:
         return render_template("taskschedule.html")
