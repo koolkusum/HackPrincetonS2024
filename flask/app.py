@@ -104,7 +104,7 @@ def authorized():
     return redirect(url_for('chatbot'))
 
 @app.route("/chatbot", methods=["GET", "POST"])
-def talktoAI():
+def chatbot():
     model = genai.GenerativeModel('models/gemini-pro')
     if 'chat_history' not in session:
         session['chat_history'] = []
