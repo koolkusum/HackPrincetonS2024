@@ -22,6 +22,7 @@ from google.generativeai import generative_models
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 app = Flask(__name__)
@@ -30,6 +31,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 load_dotenv()
 MONGODB_URI = os.getenv("MONGODB_URL")
+
 
 oauth = OAuth(app)
 oauth.register(
@@ -196,6 +198,10 @@ def extract_text_from_pdf(pdf_file):
     for page_num in range(num_pages):
         text += pdf_reader.pages[page_num].extract_text()
     return text
+
+@app.route("/dashboard/")
+def dashboard():
+    return render_template("dashboard.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
