@@ -13,7 +13,7 @@
     </form>
     {% if current_pdf %}
     <h2>Uploaded PDF</h2>
-    <iframe src="{{ url_for('show_pdf', filename = filename) }}" width="800" height="600"></iframe>
+    <iframe src="{{ url_for('show_pdf', filename = 'uploads/'+filename) }}" width="800" height="600"></iframe>
     {% endif %}
 
     {% if formatted_message %}

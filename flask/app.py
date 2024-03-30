@@ -190,7 +190,7 @@ def upload():
             # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
+            print(filepath)
 
             pdf_file.save(filepath)
             session['current_filename'] = filename  # Save the current filename in the session
@@ -208,8 +208,8 @@ def show_pdf():
     if 'current_filename' in session:
         filename = session['current_filename']
         print(filename)
-        filename = os.path.basename(filename)
-        print (filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print (filepath)
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     return "No PDF uploaded"
 
