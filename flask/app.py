@@ -6,7 +6,7 @@ import os.path
 import json
 import PyPDF2
 import requests
-
+import pymongo
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
 from datetime import datetime, timezone
@@ -29,6 +29,8 @@ app.secret_key = urandom(24)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 load_dotenv()
+MONGODB_URI = os.getenv("MONGODB_URL")
+
 oauth = OAuth(app)
 oauth.register(
     "oauthApp",
@@ -48,6 +50,12 @@ try:
         print("GENAI_API_KEY environment variable is not set.")
 except Exception as e:
     print("Error initializing GenAI client:", e)
+
+def get_db():
+    client = pymongo.MongoClient(MONGODB_URI)
+    db = client.get_default_database()  # Assuming your database name is provided in the MongoDB URI
+    return db
+
 
 @app.route("/")
 def mainpage():
