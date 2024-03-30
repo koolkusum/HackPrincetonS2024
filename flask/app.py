@@ -146,8 +146,20 @@ def upload_pdf():
         query = "As a chatbot, your goal is to summarize the the following text from a pdf in a format that easiliy digestible for a college student. Try to keep it as concise as possible: " + pdf_text
         model = genai.GenerativeModel('models/gemini-pro')
         result = model.generate_content(query)
+        formatted_message = ""
+        lines = result.text.split("\n")
+
+        for line in lines:
+            bold_text = ""
+            while "**" in line:
+                start_index = line.index("**")
+                end_index = line.index("**", start_index + 2)
+                bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
+                line = line[:start_index] + bold_text + line[end_index + 2:]
+            formatted_message += line + "<br>"
+        print(formatted_message)
         print(result.text)
-        return result.text
+        return formatted_message
 
 def extract_text_from_pdf(pdf_file):
     pdf_reader = PyPDF2.PdfReader(pdf_file)
