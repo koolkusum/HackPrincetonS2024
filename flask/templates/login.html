@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <link rel="icon" type="image/png" href="/static/images/icon.png">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: rgb(36, 31, 31);
+            color: white;
+        }
+
+        .container {
+            width: 90%; /* Increase width */
+            max-width: 400px; /* Adjust as needed */
+            padding: 40px; /* Increase padding */
+        }
+
+        form {
+            margin-top: -50px; /* Adjust as needed */
+        }
+
+        #form-title1,
+        #form-text {
+            text-align: center;
+        }
+
+        #form-text a {
+            color: #007bff; /* Adjust the color of the link */
+            text-decoration: none;
+        }
+
+        #form-text a:hover {
+            text-decoration: underline;
+        }
+        
+    </style>
+</head>
+
+<body class="bg-dark text-white">
+    <header>
+        {% include 'navbar.html' %}
+    </header>
+    <main>
+        <div class="container-fluid" style="padding-top: 10%;">
+            <form method="post" class="form-signin" style="margin-top:-100px">
+                <div class="container">
+                    <!--<img class="rounded mx-auto d-block" width = 250px length = 250px src="{{ url_for('static', filename='logo.png') }}">-->
+                    <h2 class="form-header" id="form-title1"> Login</h2>
+                    <br>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="name@example.com" required autofocus>
+                    <input style="margin-top: 10px;" type="password" name="passw" id="passw" class="form-control" placeholder="password" required>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit" style="background-color: purple; color: white; margin-top: 10px;">Log in</button>
+                    <p id="form-text" style="margin-top: 20px; text-align: center;">
+                        Don't have an account?<br>
+                        <a href="/signup">Sign up</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

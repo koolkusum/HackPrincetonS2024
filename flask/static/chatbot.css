@@ -1,0 +1,121 @@
+body {
+    height: 100vh;
+    /* background-color: red; */
+    overflow: hidden;
+}
+body::-webkit-scrollbar {
+    visibility: hidden;
+}
+h1 {
+    text-align: center;
+}
+#chatbot_area {
+    height: 100%;
+    width: 100%;
+    /* background-color: pink; */
+}
+#chatbot_area_chat {
+    height: 80vh;
+    width: 100%;
+    overflow: scroll;
+}
+#chatbot_area_chat::-webkit-scrollbar {
+    visibility: hidden;
+}
+#chatbot_area_chat_container {
+    width: 100%;
+    height: 100%;
+    padding-left: 40px;
+    padding-right: 40px;
+    /* padding-top: 15px; */
+    background-color: transparent;
+}
+#chatbot_area_textbox {
+    /* height: 35%; */
+    width: 100%;
+    /* background-color: white; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+input {
+    width: 80%;  
+    height: 50px;  
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+input[type="text"] {
+    padding: 0px 0px 0px 20px ;
+    border: 2px solid #ccc;
+    font-size: 16px;
+    outline: none;
+    width: 90%;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #007bff;
+}
+button[type="submit"]{
+    height: 50px;
+    padding: 10px 20px;
+    width: 3%;
+    font-size: 16px;
+    border: none;
+    background-color: lightblue;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+button[type="submit"]:hover {
+    box-shadow: 0 0 10px lightgray;
+}
+input[type="text"]:valid + button[type="submit"] {
+    box-shadow: 0 0 10px lightgray;
+    background-color: #007bff;
+}
+#userInput {    
+    width: 65%;
+    margin-left: auto;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+}
+#userInput p{    
+    width: auto;
+    margin: none;
+    background-color: #5fc9f8;
+    border-radius: 5px;
+    color: white;
+    font-size: 15px;
+}
+#botInput {
+    width: 65%;
+    margin-right: auto;
+    text-align: left;
+    display: flex;
+    justify-content: flex-end;
+}
+#botInput p{
+    width: auto;
+    margin-left: auto;
+    background-color: #8e8e93;
+    border-radius: 5px;
+    color: white;
+    font-size: 15px;
+}
+.chatbot-text {
+    font-family: Arial, sans-serif;
+    font-size: 30px;
+    color: #555;
+    font-weight: bold;
+}
+
+/* Style for the "Powered by Gemini AI by Google" text */
+.powered-by-text {
+    font-size: 25px;
+    color: #888;
+    margin-bottom: 20px;
+}

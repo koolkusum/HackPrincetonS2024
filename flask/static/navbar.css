@@ -1,0 +1,20 @@
+@import url('../static/colors.css');
+
+body {
+    padding-top: 5rem;
+}
+
+.btn-custom {
+    color: var(--text-color);
+    background-color: transparent;
+    border-color: var(--primary-color);
+}
+
+/* Optionally adjust hover and active states: */
+.btn-custom:hover,
+.btn-custom:focus,
+.btn-custom:active {
+    background-color: var(--btn-hover); /* Lighter shade on hover */
+    border-color: var(--primary-color);
+}
+

@@ -37,10 +37,18 @@ oauth.register(
     client_kwargs={'scope': 'scope_required_by_provider'}
 )
 
+try:
+    api_key = os.getenv("GENAI_API_KEY")
+    if api_key:
+        genai_client = generative_models.GenerativeModelsServiceClient(api_key=api_key)
+    else:
+        print("GENAI_API_KEY environment variable is not set.")
+except Exception as e:
+    print("Error initializing GenAI client:", e)
 
-
-from flask import Flask, jsonify, request
-
+@app.route("/")
+def mainpage():
+    return render_template("main.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

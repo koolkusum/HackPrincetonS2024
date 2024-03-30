@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+
+        @font-face{
+      
+          font-family: MyFont;
+      
+          src: url("My-Font.otf")format("opentype");
+      
+        } */
+      
+      
+      
+        {
+      
+          font-family: MyFont !important; 
+      
+      
+      }
+      #userInput, #botInput {
+            margin-bottom: 10px; /* Add a default margin-bottom */
+        }
+
+        .padded {
+            padding: 10px; /* Apply padding */
+        }
+      
+      </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Welcome to DRC Hack - Empowering Innovation">
+    <link rel="icon" type="image/png" href="/static/images/icon.png">
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/chatbot.css">
+    <title>DRC Hack - Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <header>
+        {%include 'navbar-auth.html' %}
+    </header>
+    <h1><div class="chatbot-text">ChatBot </div> <div class="powered-by-text">Powered by Gemini AI by <b><span style="color: #4285F4;">G</span><span style="color: #DB4437">o</span><span style="color: #F4B400">o</span><span style="color: #4285F4;">g</span><span style="color: #0F9D58">l</span><span style="color: #DB4437">e</span></span></b></div></h1>
+    <div id="chatbot_area">
+        <div id="chatbot_area_chat">
+            <div id="chatbot_area_chat_container">
+                <div id="userInput">
+                    <p>{{ question_response[0] }}</p>
+                </div>
+            
+                <div id="botInput">
+                    {% autoescape off %}
+                    <p>
+                        {{ question_response[1] }}
+                    </p>
+                    {% endautoescape %}
+                </div>
+            </div>
+        </div>
+        <form method = "post" form id="chatbot_area_textbox" >
+            <input type="text" id="message" placeholder="Talk to ChatBot" required minlength="1" name="message">
+            <button type="submit">↑</button>
+        </form>
+    </div>
+    <script>
+        // JavaScript code to add padding if the content is not empty
+        var userInputParagraph = document.querySelector('#userInput p');
+        var botInputParagraph = document.querySelector('#botInput p');
+
+        if (userInputParagraph.textContent.trim() !== '') {
+            userInputParagraph.classList.add('padded');
+        }
+
+        if (botInputParagraph.textContent.trim() !== '') {
+            botInputParagraph.classList.add('padded');
+        }
+    </script>
+
+</body>
+</html>

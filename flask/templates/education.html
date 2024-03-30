@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Women in STEM</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/static/images/icon.png" />
+    <link rel="stylesheet" href="../static/education.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    />
+  </head>
+  <body class="bg-dark text-light">
+    <!-- Background animation -->
+    <div class="bg-animation"></div>
+    <header>{% include 'navbar-auth.html' %}</header>
+
+    <main>
+      <section id="about" class="py-5">
+        <div class="container">
+          <!-- Move animated elements here -->
+          <div class="row">
+            <div class="container text-center mb-4">
+              <h1
+                class="mb-3 cool-header animate__animated animate__bounceInDown"
+              >
+                Empowering Women in STEM
+              </h1>
+              <p class="dynamic-body animate__animated animate__fadeInUp">
+                In the realm of STEM, women's contributions are transformative,
+                yet their journey is often fraught with challenges.
+              </p>
+              <p class="dynamic-body animate__animated animate__fadeInUp">
+                Despite progress, disparities persist. Addressing these
+                challenges requires concerted efforts from all stakeholders.
+              </p>
+              <p class="dynamic-body animate__animated animate__fadeInUp">
+                Encouraging girls from an early age and highlighting the
+                achievements of women are crucial steps towards gender equality
+                in STEM.
+              </p>
+              <p class="dynamic-body animate__animated animate__fadeInUp">
+                Let us celebrate the invaluable contributions of women and build
+                a future where diversity is embraced and innovation knows no
+                boundaries.
+              </p>
+            </div>
+          </div>
+          <!-- Original rows -->
+          <div class="row">
+            <div class="col-md-6">
+              <h2>Creating opportunity</h2>
+              <p class="lead">Empowering women in STEM fields leads to...</p>
+              <!-- Terminal window-looking card container -->
+              <div class="terminal-window">
+                <div class="terminal-toolbar">
+                  <div class="terminal-buttons">
+                    <div class="terminal-button terminal-close"></div>
+                    <div class="terminal-button terminal-maximize"></div>
+                    <div class="terminal-button terminal-minimize"></div>
+                  </div>
+                </div>
+                <div id="typing-text" class="lead"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-body">
+                  <!-- Instagram blockquote with rounded corners -->
+                  <blockquote
+                    class="instagram-media rounded"
+                    data-instgrm-permalink="https://www.instagram.com/rudouglass/?utm_source=ig_embed&amp;utm_campaign=loading"
+                    data-instgrm-version="14"
+                    style="
+                      border-radius: 10px;
+                      background: #fff;
+                      border: 0;
+                      box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.5),
+                        0 1px 10px 0 rgba(0, 0, 0, 0.15);
+                      margin: 1px;
+                      max-width: 540px;
+                      min-width: 326px;
+                      padding: 0;
+                      width: 99.375%;
+                      width: -webkit-calc(100% - 2px);
+                      width: calc(100% - 2px);
+                    "
+                  >
+                    <!-- Instagram script -->
+                  </blockquote>
+                  <script async src="//www.instagram.com/embed.js"></script>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Add margin between rows -->
+          <div class="row mb-4"></div>
+          <div class="row">
+            <div class="col-md-6 align-center">
+              <div class="card">
+                <div class="card-body">
+                  <!-- Wikipedia iframe -->
+                  <iframe
+                    id="wikiFrame"
+                    style="width: 100%; height: 500px"
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 flex">
+              <div class="card match-child-width">
+                <div
+                  class="card-body custom-card-body"
+                  style="height: 500px; overflow-y: scroll"
+                >
+                  <!-- Twitter embed -->
+                  <a
+                    class="twitter-timeline"
+                    href="https://twitter.com/rudouglass?ref_src=twsrc%5Etfw"
+                    >Tweets by rudouglass</a
+                  >
+                  <script
+                    async
+                    src="https://platform.twitter.com/widgets.js"
+                    charset="utf-8"
+                  ></script>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Add more sections as needed -->
+    </main>
+
+    <footer></footer>
+
+    <!-- External libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.js"></script>
+    <script>
+      // Revealing dynamic bodies
+      $(document).ready(function () {
+        $(".dynamic-body").each(function (index) {
+          $(this)
+            .delay(500 * index)
+            .queue(function () {
+              $(this).addClass("revealed").dequeue();
+            });
+        });
+      });
+
+      // List of notable STEM women
+      var notableWomen = [
+        "Grace_Hopper",
+        "Ada_Lovelace",
+        "Rosalind_Franklin",
+        "Dorothy_Vaughan",
+        "Annie_Easley",
+        "Emmy_Noether",
+        "Lise_Meitner",
+        "Chien-Shiung_Wu",
+        "Katherine_Johnson",
+        "Hedy_Lamarr",
+        "Rachel_Carson",
+        "Tu_Youyou",
+        "Valentina_Tereshkova",
+        "Frances_Arnold",
+        "Vera_Rubin",
+        "Jocelyn_Bell_Burnell",
+        "Sylvia_Earle",
+        // Add more names as needed
+      ];
+
+      // Function to randomly select a woman from the list and set the Wikipedia iframe source
+      function randomSTEMWoman() {
+        var randomIndex = Math.floor(Math.random() * notableWomen.length);
+        var woman = notableWomen[randomIndex];
+        var iframeSrc = "https://en.wikipedia.org/wiki/" + woman;
+        document.getElementById("wikiFrame").src = iframeSrc;
+      }
+
+      // Call the function after the document has been loaded
+      $(document).ready(function () {
+        randomSTEMWoman();
+      });
+    </script>
+    <script src="{{ url_for('static', filename='js/typer.js') }}"></script>
+  </body>
+</html>

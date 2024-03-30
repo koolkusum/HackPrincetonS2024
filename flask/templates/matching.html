@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Welcome to DRC Hack - Empowering Innovation">
+    <link rel="icon" type="image/png" href="/static/images/icon.png">
+    <style>
+        /* Style updates for a cleaner, card-like appearance */
+        body {
+            background-image: url("/static/images/back.jpg"); /* Replace 'path/to/your/image.jpg' with the actual path to your image */
+            background-size: cover;
+            color: #333; /* Darker text for readability */
+            font-family: Arial, sans-serif; /* Improved font choice */
+            overflow: hidden;
+        }
+
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .border.rounded-lg.p-4 {
+            background-color: white; /* Card background */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Card shadow for depth */
+            width: 100%; /* Adjust width as necessary */
+            max-width: 600px; /* Maximum width */
+            margin: auto; /* Center card */
+            padding: 20px; /* Padding for content */
+            text-align: center; /* Center content */
+            border-radius: 10px; /* Rounded corners */
+        }
+
+        .profile-img {
+            margin: 20px auto; /* Center image */
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .match-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 5px; /* Space between buttons */
+        }
+
+        #yes-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #no-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* Hover effect for buttons */
+        .match-buttons button:hover {
+            background-color: #ddd;
+            color: #333; /* Change text color for contrast */
+        }
+
+    </style>
+    <title>DRC Hack - Matchmaking</title>
+</head>
+<body>
+    <header>
+        {% include 'navbar-auth.html' %}
+    </header>
+
+    <div class="profile-container">
+        <div class="border rounded-lg p-4">
+            <h2 class="mb-4">User Profile</h2>
+            <div class="profile-info">
+                <div class="profile-img">
+                    <img src="" alt="Profile Image" id="profile-picture"> 
+                    <span id="photo"></span>
+                </div>
+                <p><strong>Name:</strong> <span id="name"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+                <p><strong>Occupation:</strong> <span id="occupation"></span></p>
+                <p><strong>Description:</strong> <span id="description"></span></p>
+            </div>
+            <div class="match-buttons">
+                <button id="yes-button">Yes</button>
+                <button id="no-button">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <!-- JavaScript logic unchanged -->
+    <script>
+        var example_profiles = [
+            {
+                "picture": "../static/images/kusum.png",
+                "name": "Kumom Gandham",
+                "email": "kumom@example.com",
+                "occupation": "Software Engineer",
+                "description": "I'm passionate about coding and love exploring new technologies. In my free time, I enjoy hiking and reading science fiction novels."
+            },
+            {
+                "picture": "../static/images/pedro.png",
+                "name": "Petra Fried Pajarillo",
+                "email": "petra@example.com",
+                "occupation": "Data Scientist",
+                "description": "I'm a data enthusiast who enjoys diving into datasets to uncover insights. Outside of work, I'm an avid runner and enjoy cooking international cuisines."
+            },
+            {
+                "picture": "../static/images/shatakshi.png",
+                "name": "Fraction Ranjan",
+                "email": "fraction@example.com",
+                "occupation": "Web Developer",
+                "description": "I'm a web developer with a keen interest in user interface design. I spend my free time experimenting with new frontend frameworks and creating personal projects."
+            },
+            {
+                "picture": "../static/images/elian.png",
+                "name": "Eliana DB",
+                "email": "eliana@example.com",
+                "occupation": "Machine Learning Engineer",
+                "description": "I'm passionate about artificial intelligence and its applications. I enjoy working on challenging ML projects and staying updated with the latest research."
+            }
+            // Add more example profiles as needed
+        ];
+        
+        var currentProfileIndex = 0;
+
+        function displayProfile(index) {
+            var profile = example_profiles[index];
+            document.getElementById('profile-picture').src = profile.picture; // This line was missing
+            document.getElementById('name').textContent = profile.name;
+            document.getElementById('email').textContent = profile.email;
+            document.getElementById('occupation').textContent = profile.occupation;
+            document.getElementById('description').textContent = profile.description;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayProfile(currentProfileIndex);
+
+            document.getElementById('yes-button').addEventListener('click', function() {
+                // Handle matching logic when user clicks Yes
+                var matchedEmail = example_profiles[currentProfileIndex].email;
+                alert('Matched with: ' + matchedEmail);
+                // Here you can send an AJAX request to your backend to store the match
+                // You may also want to handle displaying the next profile here
+                currentProfileIndex++;
+                if (currentProfileIndex >= example_profiles.length) {
+                    currentProfileIndex = 0; // Reset index to loop back
+                }
+                displayProfile(currentProfileIndex);
+            });
+
+            document.getElementById('no-button').addEventListener('click', function() {
+                // Handle logic when user clicks No
+                // Display the next user profile
+                currentProfileIndex++;
+                if (currentProfileIndex >= example_profiles.length) {
+                    currentProfileIndex = 0; // Reset index to loop back
+                }
+                displayProfile(currentProfileIndex);
+            });
+        });
+    </script>
+</body>
+</html>

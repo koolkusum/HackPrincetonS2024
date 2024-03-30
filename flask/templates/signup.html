@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Signup</title>
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/form.css')}}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/static/images/icon.png">
+  </head>
+  <style>
+    body {
+      background-color: rgb(36, 31, 31);
+      color: white;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    .form-signup {
+      width: 300px; /* Adjust the width of the form as needed */
+    }
+
+    #form-title1 {
+      text-align: center;
+    }
+
+    #form-text {
+      text-align: center;
+    }
+
+    #form-text a {
+      color: #007bff; /* Adjust the color of the link */
+      text-decoration: none;
+    }
+
+    #form-text a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  <body class="bg-dark text-white">
+	<header>
+		{% include 'navbar.html' %}
+	</header>
+    <div class="container">
+      <form method="post" action="" class="form-signup">
+        <h3 id="form-title1">Sign Up</h3>
+        <br />
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input
+            type="text"
+            class="form-control"
+            name="first_name"
+            placeholder="Evelyn"
+            required
+            autofocus
+          />
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input
+            type="text"
+            class="form-control"
+            name="last_name"
+            placeholder="Patrowski"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="inputEmail">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            name="email"
+            placeholder="name@example.com"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="inputPassword" id="form-text-left">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            name="passw"
+            placeholder="password"
+            required
+          />
+        </div>
+        <button
+          class="btn btn-lg btn-primary btn-block"
+          type="submit"
+          style="background-color: purple; color: white; margin-top: 10px"
+        >
+          Sign up
+        </button>
+        <div style="margin-top: 20px" id="form-text">
+          <a href="/login">Already have an account? Click to Login</a>
+        </div>
+      </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </body>
+</html>
