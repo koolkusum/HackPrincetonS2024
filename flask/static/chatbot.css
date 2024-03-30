@@ -88,3 +88,7 @@ body {
     cursor: pointer;
     margin-left: 10px;
 }
+.send-button:hover {
+    background-color: #5fc9f8;
+    transition: 1s;
+}
