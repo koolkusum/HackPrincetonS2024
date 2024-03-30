@@ -4,6 +4,7 @@ from os import urandom
 from dotenv import load_dotenv
 import os.path
 import json
+import PyPDF2
 
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
@@ -124,6 +125,36 @@ def chatbot():
     else:
         question_response = ("", "")
         return render_template("chatbot.html", question_response=question_response)
+
+
+@app.route("/upload")
+def index():
+    return render_template("upload.html")
+@app.route("/upload_pdf", methods=["POST"])
+def upload_pdf():
+    if "pdf_file" not in request.files:
+        return "No file part"
+
+    pdf_file = request.files["pdf_file"]
+
+    if pdf_file.filename == "":
+        return "No selected file"
+
+    if pdf_file:
+        pdf_text = extract_text_from_pdf(pdf_file)
+        query = "As a chatbot, your goal is to summarize the the following text from a pdf in a format that easiliy digestible for a college student. Try to keep it as concise as possible: " + pdf_text
+        model = genai.GenerativeModel('models/gemini-pro')
+        result = model.generate_content(query)
+        print(result.text)
+        return result.text
+
+def extract_text_from_pdf(pdf_file):
+    pdf_reader = PyPDF2.PdfReader(pdf_file)
+    num_pages = len(pdf_reader.pages)
+    text = ""
+    for page_num in range(num_pages):
+        text += pdf_reader.pages[page_num].extract_text()
+    return text
 
 if __name__ == "__main__":
     app.run(debug=True)
