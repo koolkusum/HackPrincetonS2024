@@ -5,6 +5,7 @@ import os.path
 import PyPDF2
 import pymongo
 import requests
+from flask import send_file
 
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
@@ -149,38 +150,44 @@ def send_message():
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
-@app.route("/upload")
-def index():
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    if request.method == "POST":
+        if "pdf_file" not in request.files:
+            return "No file part"
+
+        pdf_file = request.files["pdf_file"]
+
+        if pdf_file.filename == "":
+            return "No selected file"
+
+        if pdf_file:
+            pdf_text = extract_text_from_pdf(pdf_file)
+            query = "As a chatbot, your goal is to summarize the following text from a PDF in a format that is easily digestible for a college student. Try to keep it as concise as possible: " + pdf_text
+            model = genai.GenerativeModel('models/gemini-pro')
+            result = model.generate_content(query)
+            formatted_message = ""
+            lines = result.text.split("\n")
+
+            for line in lines:
+                bold_text = ""
+                while "**" in line:
+                    start_index = line.index("**")
+                    end_index = line.index("**", start_index + 2)
+                    bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
+                    line = line[:start_index] + bold_text + line[end_index + 2:]
+                formatted_message += line + "<br>"
+
+            # Save the uploaded PDF temporarily
+            pdf_path = "uploaded.pdf"
+            pdf_file.save(pdf_path)
+
+            # Remove the temporary PDF file
+            os.remove(pdf_path)
+
+            return render_template("upload.html", formatted_message=formatted_message)
+
     return render_template("upload.html")
-@app.route("/upload_pdf", methods=["POST"])
-def upload_pdf():
-    if "pdf_file" not in request.files:
-        return "No file part"
-
-    pdf_file = request.files["pdf_file"]
-
-    if pdf_file.filename == "":
-        return "No selected file"
-
-    if pdf_file:
-        pdf_text = extract_text_from_pdf(pdf_file)
-        query = "As a chatbot, your goal is to summarize the the following text from a pdf in a format that easiliy digestible for a college student. Try to keep it as concise as possible: " + pdf_text
-        model = genai.GenerativeModel('models/gemini-pro')
-        result = model.generate_content(query)
-        formatted_message = ""
-        lines = result.text.split("\n")
-
-        for line in lines:
-            bold_text = ""
-            while "**" in line:
-                start_index = line.index("**")
-                end_index = line.index("**", start_index + 2)
-                bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
-                line = line[:start_index] + bold_text + line[end_index + 2:]
-            formatted_message += line + "<br>"
-        print(formatted_message)
-        print(result.text)
-        return formatted_message
 
 def extract_text_from_pdf(pdf_file):
     pdf_reader = PyPDF2.PdfReader(pdf_file)
