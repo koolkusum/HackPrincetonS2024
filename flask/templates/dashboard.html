@@ -1,46 +1,49 @@
-{% extends "base_template.html" %} 
-{% block head %}
-<style>
-</style>
+{% extends "base_template.html" %} {% block head %}
+<style></style>
 {% endblock %}
-
 {% block content %}
 <div class="min-vh-100 d-flex flex-column align-items-center p-4">
-    <h1 class="text-center">Calendar</h1>
-    <div class="d-flex flex-column flex-fill container-fluid">
-        <div class="row justify-content-center g-0 mb-2">
-            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-            <div class="col-lg">
-                <div class="card card-header rounded-0 border-0 text-center">
-                    {{ day }}
-                </div>
+  <h1 class="text-center">Calendar</h1>
+  <div class="d-flex flex-column flex-fill container-fluid">
+    <div class="row justify-content-center g-0 mb-2">
+        {% for day, day_number in days_with_number %}
+        <div class="col-lg">
+            <div class="card card-header rounded-0 border-0 text-center">
+                {{ day }}
+                <span class="badge bg-dark-subtle">{{ day_number }}</span> 
             </div>
-            {% endfor %}
         </div>
-
-        <div class="row justify-content-center">
-            {% for column in range(1, 8) %}
-            <div class="col-lg ">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Event {{ column }}</h5>
-                        <p class="card-text">This is the content of column {{ column }}</p>
-                        <button type="button" class="btn btn-danger float-end " onclick="deleteParentParent(this)"></button>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+        {% endfor %}
     </div>
+
+    <div class="row justify-content-center">
+      {% for column in range(1, 8) %}
+      <div class="col-lg">
+        {% for event in events[column - 1] %}
+        <div class="card mb-3">
+          <div class="card-body text-center">
+            <p class="card-text">{{ event }}</p>
+            <button
+              type="button"
+              class="btn btn-danger float-end"
+              onclick="deleteParentParent(this)"
+            ></button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 
 <script>
-    function deleteParentParent(element) {
-        // Get the grandparent element (outer div with class col-1)
-        var grandparent = element.parentElement.parentElement;
-        
-        // Remove the grandparent element
-        grandparent.remove();
-    }
+  function deleteParentParent(element) {
+    // Get the grandparent element (outer div with class col-1)
+    var grandparent = element.parentElement.parentElement;
+
+    // Remove the grandparent element
+    grandparent.remove();
+  }
 </script>
 {% endblock %}

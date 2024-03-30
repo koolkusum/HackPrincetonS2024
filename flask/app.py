@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 import datetime as dt
 from authlib.integrations.flask_client import OAuth
 import uuid
@@ -264,12 +264,20 @@ def dashboard():
     ["Event 1 - Mon", "Event 2 - Mon", "Event 4 - Mon"],  # Monday
     ["Event 1 - Tue", "Event 2 - Tue"],                # Tuesday
     ["Event 1 - Wed"],                                # Wednesday
-    ["Event 4 - Thu"],                                # Thursday
-    ["Event 1 - Fri", "Event 4 - Fri"],                # Friday
+    ["Event 1 - Thu"],                                # Thursday
+    ["Event 1 - Fri", "Event 2 - Fri"],                # Friday
     [],                                               # Saturday
     []                                                # Sunday
 ]
-    return render_template('dashboard.html', events=events)
+    today = date.today()
+    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    days_with_number = []
+    for i in range(7):
+        day_info = (weekdays[i], (today + timedelta(days=i)).day)
+        days_with_number.append(day_info)
+        
+    return render_template('dashboard.html', events=events, days_with_number=days_with_number)
 
 def generate_scheduling_query(tasks):
     
