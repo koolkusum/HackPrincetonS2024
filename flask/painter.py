@@ -1,51 +1,49 @@
 import cv2
 import numpy as np
+import time
 import os
-import tracker as htm  # Make sure tracker.py is properly implemented
+import tracker as htm
 
-#######################
-brushThickness = 25
+brushThickness = 15
 eraserThickness = 100
-########################
 
-folderPath = 'Header'
+folderPath = "Header"
 myList = os.listdir(folderPath)
-print(myList)
+#print(myList)
 overlayList = []
-for imPath in myList:
-    image = cv2.imread(f'{folderPath}/{imPath}')  # Fixed quotation mark
+for inPath in myList:
+    image = cv2.imread(f'{folderPath}/{inPath}')
     overlayList.append(image)
-print(len(overlayList))
+#print(len(overlayList))
+
 header = overlayList[0]
 drawColor = (255, 0, 255)
-
-cap = cv2.VideoCapture(1)  # Make sure the correct camera index is used, 0 for default camera
+cap = cv2.VideoCapture(0)
 cap.set(3, 1280)
 cap.set(4, 720)
 
-detector = htm.handDetector(detectionCon=0.65, maxHands=1)
+detector = htm.HandDetector(detectionCon=0.85)
 xp, yp = 0, 0
 imgCanvas = np.zeros((720, 1280, 3), np.uint8)
 
 while True:
     success, img = cap.read()
     img = cv2.flip(img, 1)
-
-    # 2. Find Hand Landmarks
     img = detector.findHands(img)
-    lmList = detector.findPosition(img, draw=False)
+    lmlist = detector.findPosition(img, draw=False)
+    if len(lmlist) != 0:
+        #print(lmlist)
+        x1, y1 = lmlist[8][1:]
+        x2, y2 = lmlist[12][1:]
+    
+    fingers = detector.fingersUp()
+    #print(fingers)
 
-    if len(lmList) != 0:
-        x1, y1 = lmList[8][1:]  # tip of index finger
-        x2, y2 = lmList[12][1:]  # tip of middle finger
-
-        # 3. Check which fingers are up
-        fingers = detector.fingersUp()
-
-        # 4. If Selection Mode – Two fingers are up
+    if len(fingers) >= 3:
         if fingers[1] and fingers[2]:
+            xp, yp = 0, 0
             print("Selection Mode")
-            if y1 < 125:  # Checking for the click
+            if y1 < 125:
                 if 250 < x1 < 450:
                     header = overlayList[0]
                     drawColor = (255, 0, 255)
@@ -58,16 +56,22 @@ while True:
                 elif 1050 < x1 < 1200:
                     header = overlayList[3]
                     drawColor = (0, 0, 0)
-            cv2.rectangle(img, (x1, y1 - 25), (x2, y2 + 25), drawColor, cv2.FILLED)
+            cv2.rectangle(img, (x1, y1-25), (x2, y2+25), drawColor, cv2.FILLED)
 
-        # 5. If Drawing Mode – Index finger is up
+    if len(fingers) >= 2:
         if fingers[1] and not fingers[2]:
             cv2.circle(img, (x1, y1), 15, drawColor, cv2.FILLED)
             print("Drawing Mode")
             if xp == 0 and yp == 0:
                 xp, yp = x1, y1
+            
+            if drawColor == (0, 0, 0):
+                cv2.line(img, (xp, yp), (x1, y1), drawColor, eraserThickness)
+                cv2.line(imgCanvas, (xp, yp), (x1, y1), drawColor, eraserThickness)
+            else:
+                cv2.line(img, (xp,yp), (x1, y1), drawColor, brushThickness)
+                cv2.line(imgCanvas, (xp,yp), (x1, y1), drawColor, brushThickness)
 
-            cv2.line(img, (xp, yp), (x1, y1), drawColor, brushThickness)
             xp, yp = x1, y1
 
     imgGray = cv2.cvtColor(imgCanvas, cv2.COLOR_BGR2GRAY)
@@ -76,15 +80,17 @@ while True:
     img = cv2.bitwise_and(img, imgInv)
     img = cv2.bitwise_or(img, imgCanvas)
 
-    # Setting the header image
-    img[0:125, 0:1280] = header
-    cv2.imshow('Image', img)
-    cv2.imshow('Canvas', imgCanvas)
-    cv2.imshow('Inv', imgInv)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # Ensure the header image dimensions match the canvas and screen
+    header_resized = cv2.resize(header, (1280, 120))
 
-# After the loop release the cap object
-cap.release()
-# Destroy all the windows
-cv2.destroyAllWindows()
+    # Place the header at the top
+    img[0:120, 0:1280] = header_resized
+
+    # Blend the canvas and image together
+    img = cv2.addWeighted(img, 0.5, imgCanvas, 0.5, 0)
+
+    # Display the images
+    cv2.imshow("Image", img)
+    cv2.imshow("Canvas", imgCanvas)
+    cv2.waitKey(1)
+        
