@@ -1,4 +1,5 @@
-{% extends "base_template.html" %} {% block head %}
+{% extends "base_template.html" %}
+{% block head %}
 <style></style>
 {% endblock %}
 {% block content %}
@@ -22,11 +23,11 @@
         {% for event in events[column - 1] %}
         <div class="card mb-3">
           <div class="card-body text-center">
-            <p class="card-text">{{ event }}</p>
+            <p class="card-text">{{ event.details }}</p>
             <button
               type="button"
               class="btn btn-danger float-end"
-              onclick="deleteParentParent(this)"
+              onclick="deleteParentParent(this, '{{ event.id }}', '{{ event.details }}')"
             ></button>
           </div>
         </div>
@@ -38,12 +39,18 @@
 </div>
 
 <script>
-  function deleteParentParent(element) {
-    // Get the grandparent element (outer div with class col-1)
-    var grandparent = element.parentElement.parentElement;
-
-    // Remove the grandparent element
-    grandparent.remove();
-  }
+    function deleteParentParent(element, eventId, eventDetails) {
+      // Get the grandparent element (outer div with class col-1)
+      var grandparent = element.parentElement.parentElement;
+  
+      // Remove the grandparent element
+      grandparent.remove();
+  
+      // Send an AJAX request to delete the event from Google Calendar
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/delete-event", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify({ eventId: eventId, eventDetails: eventDetails }));
+    }
 </script>
 {% endblock %}

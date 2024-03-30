@@ -27,6 +27,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials
+
 SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
 
 app = Flask(__name__)
@@ -258,26 +260,59 @@ def extract_text_from_pdf(pdf_file):
         text += pdf_reader.pages[page_num].extract_text()
     return text
 
+from datetime import date, timedelta
+
 @app.route("/dashboard/")
 def dashboard():
-    events = [
-    ["Event 1 - Mon", "Event 2 - Mon", "Event 4 - Mon"],  # Monday
-    ["Event 1 - Tue", "Event 2 - Tue"],                # Tuesday
-    ["Event 1 - Wed"],                                # Wednesday
-    ["Event 1 - Thu"],                                # Thursday
-    ["Event 1 - Fri", "Event 2 - Fri"],                # Friday
-    [],                                               # Saturday
-    []                                                # Sunday
-]
+    creds = get_credentials()
+    service = build('calendar', 'v3', credentials=creds)
+
     today = date.today()
     weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-    days_with_number = []
+    # Get the index of the current day in the weekdays list
+    current_day_index = today.weekday()
+
+    # Rearrange the weekdays list so that the current day is first
+    reordered_weekdays = weekdays[current_day_index:] + weekdays[:current_day_index]
+
+    events = [[] for _ in range(7)]
     for i in range(7):
-        day_info = (weekdays[i], (today + timedelta(days=i)).day)
-        days_with_number.append(day_info)
-        
+        start_date = today + timedelta(days=i)
+        end_date = start_date + timedelta(days=1)
+        start_date_str = start_date.isoformat() + "T00:00:00Z"
+        end_date_str = end_date.isoformat() + "T23:59:59Z"
+        event_result = service.events().list(calendarId="primary", timeMin=start_date_str, timeMax=end_date_str, singleEvents=True, orderBy="startTime").execute()
+        items = event_result.get("items", [])
+        for event in items:
+            start = event["start"].get("dateTime", event["start"].get("date"))
+            events[i].append({"id": event["id"], "details": f"{start} - {event['summary']}"})
+
+    days_with_number = [(reordered_weekdays[i], (today + timedelta(days=i)).day) for i in range(7)]
+
     return render_template('dashboard.html', events=events, days_with_number=days_with_number)
+
+
+@app.route("/delete-event", methods=["POST"])
+def delete_event():
+    request_data = request.json
+    event_id = request_data.get("eventId")
+    event_details = request_data.get("eventDetails")
+
+    # Convert event_details to start_time_str and event_name
+    start_time_str, event_name = event_details.split(" - ")
+
+    # Convert start_time_str to ISO 8601 format
+    start_time_iso = convert_to_iso8601(start_time_str)
+
+    if start_time_iso is None:
+        return jsonify({"message": "Invalid start time format"}), 400
+
+    if delete_calendar_event(event_id, start_time_iso):
+        return jsonify({"message": "Event deleted successfully"})
+    else:
+        return jsonify({"message": "Error deleting event"}), 500
+
 
 def generate_scheduling_query(tasks):
     
