@@ -16,11 +16,29 @@
     <iframe src="{{ url_for('show_pdf') }}" width="800" height="600"></iframe>
     {% endif %}
 
-
-
     {% if formatted_message %}
     <h2>Summarization:</h2>
     <p>{{ formatted_message | safe }}</p>
+    <button id="play-button">Play Summary</button>
     {% endif %}
+
+    <!-- JavaScript for speech synthesis -->
+    <script>
+        // Function to speak the formatted text
+        function speakText() {
+            var text = "{{ formatted_message }}"; // Retrieve the formatted text from the template
+            var speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'en-US'; // Set language to English (United States)
+            speech.volume = 1; // Set volume (0 to 1)
+            speech.rate = 1; // Set rate (0.1 to 10)
+            speech.pitch = 1; // Set pitch (0 to 2)
+            speechSynthesis.speak(speech);
+        }
+
+        // Event listener for the play button
+        document.getElementById('play-button').addEventListener('click', function() {
+            speakText();
+        });
+    </script>
 </body>
 </html>
