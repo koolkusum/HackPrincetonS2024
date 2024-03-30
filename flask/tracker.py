@@ -1,96 +1,73 @@
 import cv2
 import mediapipe as mp
 import time
-import mediapipe as mp
+
+class HandDetector:
+    def __init__(self, mode=False, maxHands=2, detectionCon=0.5, trackCon=0.5):
+        self.mode = mode
+        self.maxHands = maxHands
+        self.detectionCon = detectionCon
+        self.trackCon = trackCon
+
+        self.mpHands = mp.solutions.hands
+        self.hands = self.mpHands.Hands(static_image_mode=self.mode,
+                                        max_num_hands=self.maxHands,
+                                        min_detection_confidence=self.detectionCon,
+                                        min_tracking_confidence=self.trackCon)
+        self.mpDraw = mp.solutions.drawing_utils
 
 
-cap = cv2.VideoCapture(0)
-mpHands = mp.solutions.hands
-hands = mpHands.Hands()
-mpdraw = mp.solutions.drawing_utils
+    def findHands(self, img, draw=True):
+        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        self.results = self.hands.process(imgRGB)
 
-pTime = 0
-cTime = 0
+        if self.results.multi_hand_landmarks:
+            for handLms in self.results.multi_hand_landmarks:
+                if draw:
+                    self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
+        return img
 
-while True:
-    success, img = cap.read()
-
-    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    results = hands.process(imgRGB)
-    #print(results.multi_hand_landmarks)
-
-    # ...
-
-    if results.multi_hand_landmarks:
-        for handLms in results.multi_hand_landmarks:
-            for id, lm in enumerate(handLms.landmark):
-                #print(id, lm)
+    def findPosition(self, img, handNo=0, draw=True):
+        lmList = []
+        if self.results.multi_hand_landmarks:
+            hand = self.results.multi_hand_landmarks[handNo]
+            for id, lm in enumerate(hand.landmark):
                 h, w, c = img.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
-                print(id, cx, cy)
-                #if id == 0:
-                cv2.circle(img, (cx, cy), 25, (255, 0, 255), cv2.FILLED)
+                lmList.append((id, cx, cy))
+                if draw:
+                    cv2.circle(img, (cx, cy), 7, (255, 0, 255), cv2.FILLED)
+        return lmList
 
-            mpdraw.draw_landmarks(img, handLms, mpHands.HAND_CONNECTIONS)
+def main():
+    pTime = 0
+    detector = HandDetector()
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        print("Error: Could not open video capture device.")
+        return
 
-    cTime = time.time()
-    fps = 1 / (cTime - pTime)
-    pTime = cTime
+    while True:
+        success, img = cap.read()
+        if not success:
+            print("Failed to capture image.")
+            break
+        img = detector.findHands(img)
+        lmList = detector.findPosition(img, draw=False)
+        if len(lmList) != 0:
+            print(lmList[4])  # Example: print position of the thumb tip
 
-    cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        cTime = time.time()
+        fps = 1 / (cTime - pTime)
+        pTime = cTime
 
-    cv2.imshow("Hand Detection", img)
-    cv2.waitKey(1)
-
-
-'''
-# Initialize MediaPipe Face Detection and Face Mesh (Landmark Detection) models.
-face_detector = mp.solutions.face_detection.FaceDetection(min_detection_confidence=0.5)
-face_landmarker = mp.solutions.face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-
-# Create a MediaPipe drawing utils object for drawing the detection and landmarks.
-drawing_utils = mp.solutions.drawing_utils
-
-# Open a video capture object for the default camera.
-cap = cv2.VideoCapture(0)
-
-# Loop over the video frames.
-while cap.isOpened():
-    # Read a frame from the video capture object.
-    ret, frame = cap.read()
-
-    # If the frame is successfully captured, process it.
-    if ret:
-        # Convert the frame to RGB as required by MediaPipe.
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # Detect faces in the frame.
-        face_detection_results = face_detector.process(rgb_frame)
-
-        # Process the frame for landmarks separately to ensure accuracy.
-        landmark_results = face_landmarker.process(rgb_frame)
-
-        # If at least one face is detected, draw bounding boxes around them.
-        if face_detection_results.detections:
-            for detection in face_detection_results.detections:
-                drawing_utils.draw_detection(frame, detection)
-
-        # If face landmarks are detected, draw them.
-        if landmark_results.multi_face_landmarks:
-            for face_landmarks in landmark_results.multi_face_landmarks:
-                drawing_utils.draw_landmarks(frame, face_landmarks, mp.solutions.face_mesh.FACEMESH_CONTOURS,
-                                             landmark_drawing_spec=None, connection_drawing_spec=mp.solutions.drawing_styles
-                                             .get_default_face_mesh_contours_style())
-
-        # Display the processed frame.
-        cv2.imshow('MediaPipe Face Detection and Landmarks', frame)
-
-        # Press 'q' to quit the loop and end the program.
+        cv2.putText(img, f'FPS: {int(fps)}', (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        cv2.imshow("Hand Detection", img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-# Release the video capture object and close OpenCV windows.
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
 
-'''
+if __name__ == "__main__":
+    main()
