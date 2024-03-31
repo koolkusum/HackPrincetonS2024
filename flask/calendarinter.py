@@ -3,7 +3,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import os
 
@@ -67,6 +67,23 @@ def delete_calendar_event(event_id, start_time_str):
         else:
             print(f"Error deleting event by ID: {e}")
             return False
+        
+def parse_event_details(event_details):
+    # Split the event details into datetime and description
+    datetime_str, description = event_details.split(' - ')
+
+    # Parse the datetime string
+    datetime_obj = datetime.fromisoformat(datetime_str)
+
+    # Format the datetime and description in a user-friendly format
+    formatted_date = datetime_obj.strftime('%B %d')
+    formatted_time = datetime_obj.strftime('%I:%M %p')
+    end_time = (datetime_obj + timedelta(hours=1)).strftime('%I:%M %p')
+
+    # Create the user-friendly event details string
+    user_friendly_details = f"{description}<br><br>{formatted_time} - {end_time}"
+
+    return user_friendly_details
 
 def convert_to_iso8601(start_time_str):
     try:

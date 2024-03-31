@@ -28,7 +28,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials, parse_datetime_to_day_number
+from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials, parse_datetime_to_day_number, parse_event_details
 
 SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
 
@@ -53,6 +53,10 @@ oauth.register(
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+@app.context_processor
+def inject_exists_credentials():
+    return {'exists_credentials': os.path.exists('credentials.json')}
+
 
 def get_db():
     client = pymongo.MongoClient(MONGODB_URI)
@@ -71,6 +75,17 @@ def signup():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     return oauth.create_client("oauthApp").authorize_redirect(redirect_uri=url_for('authorized', _external=True))
+
+@app.route('/logout')
+def logout():
+    # Clear token.json and credentials.json if they exist
+    if os.path.exists('token.json'):
+        os.remove('token.json')
+    if os.path.exists('credentials.json'):
+        os.remove('credentials.json')
+    
+    # Redirect to the main page or any desired page after logout
+    return redirect(url_for('/'))
 
 @app.route('/authorized')
 def authorized():
@@ -226,8 +241,8 @@ def extract_text_from_pdf(pdf_file):
         text += pdf_reader.pages[page_num].extract_text()
     return text
 
-@app.route("/dashboard/")
-def dashboard():
+@app.route("/calendar/")
+def calendar():
     creds = get_credentials()
     service = build('calendar', 'v3', credentials=creds)
 
@@ -257,7 +272,7 @@ def dashboard():
 
     days_with_number = [(reordered_weekdays[i], (today + timedelta(days=i)).day) for i in range(7)]
 
-    return render_template('dashboard.html', events=events, days_with_number=days_with_number)
+    return render_template('calendar.html', events=events, days_with_number=days_with_number, parse=parse_event_details)
 
 
 @app.route("/delete-event", methods=["POST"])

@@ -16,15 +16,8 @@
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-    <header style="padding-top: 6vw;">
-        <nav class="navbar fixed-top navbar-light bg-light rounded-5 m-5 bg-dark-subtle">
-            <div class="container-fluid">
-              <a class="navbar-brand" href="#">
-                <img src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="30" height="24" class="d-inline-block align-text-top">
-                Bootstrap
-              </a>
-            </div>
-        </nav>
+    <header class="pt-5">
+        {% include "navbar.html" %}
     </header>
     <body>
         {% block content %}{% endblock %}

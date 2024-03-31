@@ -1,30 +1,35 @@
 {% extends "base_template.html" %}
 {% block head %}
-<style></style>
+<style>
+  @import url('../static/colors.css');
+
+  .bg-green {
+    background-color: var(--primary-color) !important;
+  }
+</style>
 {% endblock %}
 {% block content %}
 <div class="min-vh-100 d-flex flex-column align-items-center p-4">
-  <h1 class="text-center">Calendar</h1>
-  <div class="d-flex flex-column flex-fill container-fluid">
-    <div class="row justify-content-center g-0 mb-2">
+  <div class="d-flex flex-column flex-fill container-fluid p-4">
+    <div class="row g-0 mb-2 p-2">
         {% for day, day_number in days_with_number %}
         <div class="col-lg">
-            <div class="card card-header rounded-0 border-0 text-center">
+            <div class="card card-header rounded-0 border-0 text-center display-5">
                 {{ day }}
-                <span class="badge bg-dark-subtle">{{ day_number }}</span> 
+                <span class="badge bg-success opacity-75 mt-3">{{ day_number }}</span> 
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <div class="row justify-content-center">
+    <div class="row">
       {% for column in range(1, 8) %}
       <div class="col-lg">
         {% for event in events[column - 1] %}
         {% if event.day == days_with_number[column-1][1] %}
         <div class="card mb-3">
           <div class="card-body text-center">
-            <p class="card-text">{{ event.details }}{{event.day}}</p>
+            <p class="card-text ">{{ parse(event.details) | safe }}</p>
             <button
               type="button"
               class="btn btn-danger float-end"
