@@ -20,7 +20,7 @@
   z-index: -1;
   opacity: 0.6; /* Adjust opacity as needed */
   pointer-events: none;
-  background: linear-gradient(45deg, #8e2de2, #4a00e0, #8e2de2, #4a00e0);
+  background: linear-gradient(45deg, #2ecc71, #27ae60, #2ecc71, #27ae60);
   background-size: 400% 400%;
   animation: gradientAnimation 10s ease infinite;
 }

@@ -381,7 +381,11 @@ def generate_scheduling_query(tasks):
 def education():
     return render_template("education.html")
 
-
+@app.route('/runcode')
+def run_code():
+    # Run your Python script using a bash command
+    subprocess.run(["python", "painter.py"])
+    return 'Script executed'
 
 @app.route("/taskschedule", methods=["GET", "POST"])
 def taskschedule():
