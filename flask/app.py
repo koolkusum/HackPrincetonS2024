@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import os.path
 import PyPDF2
 import pymongo
-import shutil
 import requests
 from flask import send_file
 from flask import send_from_directory
@@ -28,7 +27,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations', 'https://www.googleapis.com/auth/documents']
+SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
 
 app = Flask(__name__)
 app.secret_key = urandom(24)
@@ -47,7 +46,7 @@ oauth.register(
     authorize_url='https://dev-jkuyeavh0j4elcuc.us.auth0.com/oauth/authorize',
     client_kwargs={'scope': 'scope_required_by_provider'}
 )
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -155,6 +154,7 @@ def send_message():
             bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
             line = line[:start_index] + bold_text + line[end_index + 2:]
         formatted_message += line + "<br>"
+    # print(formatted_message)
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
@@ -177,6 +177,7 @@ def upload():
             result = model.generate_content(query)
             formatted_message = ""
             lines = result.text.split("\n")
+            print(result.text)
             for line in lines:
                 bold_text = ""
                 while "**" in line:
@@ -185,6 +186,8 @@ def upload():
                     bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
                     line = line[:start_index] + bold_text + line[end_index + 2:]
                 formatted_message += line + "<br>"
+            print(formatted_message)
+            # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             filepath = filepath.replace('\\','/')
@@ -204,30 +207,6 @@ def upload():
             print(filename)
             session['current_filename'] = filename
             session['current_pdf'] = True
-            
-            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-
-            service = build("docs", "v1", credentials=creds)
-            doc = {
-                'title': 'Summarized Text Document'
-            }
-            doc = service.documents().create(body=doc).execute()
-            doc_id = doc.get('documentId')
-
-            requests = [
-                {
-                    'insertText': {
-                        'location': {
-                            'index': 1,
-                        },
-                        'text': result.text,
-                    }
-                }
-            ]
-            result = service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
-
-            doc_url = f"https://docs.google.com/document/d/{doc_id}"
-
 
             return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, filename=filename)
 
@@ -238,7 +217,9 @@ def upload():
 def show_pdf():
     if 'current_filename' in session:
         filename = session['current_filename']
+        print(filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print (filepath)
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     return "No PDF uploaded"
 
@@ -295,6 +276,8 @@ def generate_scheduling_query(tasks):
     model = genai.GenerativeModel('models/gemini-pro')
     result = model.generate_content(query + taskss)
     return result
+
+
 
 @app.route("/taskschedule", methods=["GET", "POST"])
 def taskschedule():
@@ -445,7 +428,6 @@ def taskschedule():
 @app.route("/cal")
 def cal():
     return render_template("cal.html")
-
 
 if __name__ == "__main__":
     app.run(debug=True)
