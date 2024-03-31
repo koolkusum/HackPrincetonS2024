@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os.path
 import PyPDF2
 import pymongo
-import shutil
 import requests
 from flask import send_file
 from flask import send_from_directory
@@ -18,6 +17,7 @@ import datetime as dt
 from authlib.integrations.flask_client import OAuth
 import uuid
 
+
 import google.generativeai as genai
 from google.auth import load_credentials_from_file
 from google.oauth2 import credentials
@@ -28,9 +28,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+<<<<<<< HEAD
 from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials, parse_datetime_to_day_number, parse_event_details
 
 SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations', 'https://www.googleapis.com/auth/documents']
+=======
+SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
+>>>>>>> ed523345893b1b07ff9bd3c86e8244a31bd58c40
 
 app = Flask(__name__)
 app.secret_key = urandom(24)
@@ -50,7 +54,7 @@ oauth.register(
     authorize_url='https://dev-jkuyeavh0j4elcuc.us.auth0.com/oauth/authorize',
     client_kwargs={'scope': 'scope_required_by_provider'}
 )
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.context_processor
@@ -173,6 +177,7 @@ def send_message():
             bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
             line = line[:start_index] + bold_text + line[end_index + 2:]
         formatted_message += line + "<br>"
+    # print(formatted_message)
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
@@ -180,7 +185,6 @@ def send_message():
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     if request.method == "POST":
-        print(request.files)
         if "pdf_file" not in request.files:
             return "No file part"
 
@@ -196,6 +200,7 @@ def upload():
             result = model.generate_content(query)
             formatted_message = ""
             lines = result.text.split("\n")
+            print(result.text)
             for line in lines:
                 bold_text = ""
                 while "**" in line:
@@ -204,36 +209,17 @@ def upload():
                     bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
                     line = line[:start_index] + bold_text + line[end_index + 2:]
                 formatted_message += line + "<br>"
+            print(formatted_message)
+            # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(filepath)
 
             pdf_file.save(filepath)
-            session['current_filename'] = filename
+            session['current_filename'] = filename  # Save the current filename in the session
+
+            # Set the current_pdf variable to True to indicate that a PDF has been uploaded
             session['current_pdf'] = True
-            
-            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-
-            service = build("docs", "v1", credentials=creds)
-            doc = {
-                'title': 'Summarized Text Document'
-            }
-            doc = service.documents().create(body=doc).execute()
-            doc_id = doc.get('documentId')
-
-            requests = [
-                {
-                    'insertText': {
-                        'location': {
-                            'index': 1,
-                        },
-                        'text': result.text,
-                    }
-                }
-            ]
-            result = service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
-
-            doc_url = f"https://docs.google.com/document/d/{doc_id}"
-
 
             return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, filename=filename)
 
@@ -244,7 +230,9 @@ def upload():
 def show_pdf():
     if 'current_filename' in session:
         filename = session['current_filename']
+        print(filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print (filepath)
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     return "No PDF uploaded"
 
@@ -362,6 +350,8 @@ def generate_scheduling_query(tasks):
 @app.route("/education")
 def education():
     return render_template("education.html")
+
+
 
 @app.route("/taskschedule", methods=["GET", "POST"])
 def taskschedule():
@@ -496,8 +486,11 @@ def rank_keywords():
     response = result.text.split(':', 1)[-1].strip()
     print(response)
 
+<<<<<<< HEAD
     # Return the ranked keywords as JSON
     return jsonify({'keywords': response})
 
+=======
+>>>>>>> ed523345893b1b07ff9bd3c86e8244a31bd58c40
 if __name__ == "__main__":
     app.run(debug=True)
