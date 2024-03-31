@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 import datetime as dt
 from authlib.integrations.flask_client import OAuth
 import uuid
+import subprocess
 
 import google.generativeai as genai
 from google.auth import load_credentials_from_file
@@ -161,7 +162,6 @@ def send_message():
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     if request.method == "POST":
-        print(request.files)
         if "pdf_file" not in request.files:
             return "No file part"
 
@@ -187,8 +187,20 @@ def upload():
                 formatted_message += line + "<br>"
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
+            filepath = filepath.replace('\\','/')
             pdf_file.save(filepath)
+            def copy_file(source_path, destination_path):
+                try:
+                    subprocess.run(['copy', source_path, destination_path], shell=True)
+                    print(f"File copied from {source_path} to {destination_path} successfully.")
+                except Exception as e:
+                    print(f"Error occurred: {str(e)}")
+
+            # Example usage:
+            source_path = os.path.abspath('./static/lecture1.pdf')
+            destination_path = os.path.abspath('./static/uploads/lecture1.pdf')
+
+            copy_file(source_path, destination_path)
             session['current_filename'] = filename
             session['current_pdf'] = True
             
