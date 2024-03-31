@@ -8,10 +8,6 @@
     <title>Home</title>
     <style>
         /* Custom CSS */
-        body {
-            background-image: url("/static/images/work.jpg"); /* Replace 'path/to/your/image.jpg' with the actual path to your image */
-            background-size: cover;
-        }
 
         /* Additional styling for the content */
         .container {
@@ -35,10 +31,9 @@
 <header>
     {% include 'navbar.html' %}
 </header>
-<body>
-
-    <div class="container mt-4">
-        <h2>Professional Development</h2>
+<body class="bg-dark-subtle mt-4">
+    <div class="container p-4 mt-5" style="margin-top: 100px">
+        <h2 class="text-center mb-1">Professional Development</h2>
         <h4>Events Near You: </h4>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="careerEvents">
             <!-- Dynamic career event cards will be inserted here -->
@@ -117,7 +112,7 @@
                         <div class="card-body">
                             <h5 class="card-title">${event.title}</h5>
                             <p class="card-text">${event.description}</p>
-                            <button class="btn btn-primary" style="background-color: green;" onclick="attendEvent('${event.title}', '${event.description}', '${event.location}', '${event.date}', '${event.startTime}', '${event.endTime}', '${event.timezone}')">Attend Event</button>
+                            <button class="btn btn-primary" " onclick="attendEvent('${event.title}', '${event.description}', '${event.location}', '${event.date}', '${event.startTime}', '${event.endTime}', '${event.timezone}')">Attend Event</button>
 
                         </div>
                     </div>
