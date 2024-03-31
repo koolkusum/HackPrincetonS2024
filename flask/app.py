@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os.path
 import PyPDF2
 import pymongo
+import shutil
 import requests
 from flask import send_file
 from flask import send_from_directory
@@ -15,7 +16,6 @@ from datetime import datetime, timezone
 import datetime as dt
 from authlib.integrations.flask_client import OAuth
 import uuid
-
 
 import google.generativeai as genai
 from google.auth import load_credentials_from_file
@@ -46,7 +46,7 @@ oauth.register(
     authorize_url='https://dev-jkuyeavh0j4elcuc.us.auth0.com/oauth/authorize',
     client_kwargs={'scope': 'scope_required_by_provider'}
 )
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -154,7 +154,6 @@ def send_message():
             bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
             line = line[:start_index] + bold_text + line[end_index + 2:]
         formatted_message += line + "<br>"
-    # print(formatted_message)
     
     return jsonify({'message': formatted_message, 'chat_history': chat_history})
 
@@ -162,6 +161,7 @@ def send_message():
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     if request.method == "POST":
+        print(request.files)
         if "pdf_file" not in request.files:
             return "No file part"
 
@@ -177,7 +177,6 @@ def upload():
             result = model.generate_content(query)
             formatted_message = ""
             lines = result.text.split("\n")
-            print(result.text)
             for line in lines:
                 bold_text = ""
                 while "**" in line:
@@ -186,22 +185,16 @@ def upload():
                     bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
                     line = line[:start_index] + bold_text + line[end_index + 2:]
                 formatted_message += line + "<br>"
-            print(formatted_message)
-            # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print(filepath)
 
             pdf_file.save(filepath)
-            session['current_filename'] = filename  # Save the current filename in the session
-
-            # Set the current_pdf variable to True to indicate that a PDF has been uploaded
+            session['current_filename'] = filename
             session['current_pdf'] = True
             
             creds = Credentials.from_authorized_user_file("token.json", SCOPES)
 
             service = build("docs", "v1", credentials=creds)
-                    # Create a new Google Doc
             doc = {
                 'title': 'Summarized Text Document'
             }
@@ -220,7 +213,6 @@ def upload():
             ]
             result = service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
 
-            # Get the URL of the created Google Doc
             doc_url = f"https://docs.google.com/document/d/{doc_id}"
 
 
@@ -233,9 +225,7 @@ def upload():
 def show_pdf():
     if 'current_filename' in session:
         filename = session['current_filename']
-        print(filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        print (filepath)
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     return "No PDF uploaded"
 

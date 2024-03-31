@@ -35,12 +35,14 @@
                 <!-- Bootstrap Audio Player -->
                 {% endif %}
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" style="margin-top: 113px;">
                 {% if current_pdf %}
                 <h2>Uploaded PDF</h2>
-                <iframe src="{{ url_for('show_pdf') }}" class="embed-responsive" width="800" height="600"></iframe>
+                <iframe src="../static/lecture1.pdf" class="embed-responsive" style="width: 800px; height: 600px;"></iframe>
                 {% endif %}
             </div>
+            
+
         </div>
     </div>
 
