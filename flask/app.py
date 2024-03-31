@@ -355,47 +355,52 @@ def generate_scheduling_query(tasks):
     model = genai.GenerativeModel('models/gemini-pro')
     result = model.generate_content(query + taskss)
     return result
+    
+@app.route("/education")
+def education():
+    return render_template("education.html")
 
 @app.route("/taskschedule", methods=["GET", "POST"])
 def taskschedule():
     if request.method == "POST":
-        data = request.json  # Extract the JSON data sent from the frontend
-        tasks = data.get("tasks")  # Extract the "tasks" list from the JSON data
-        # Process the tasks data here
-        #print("Received tasks:", tasks)
-        # Optionally, you can store the tasks in a database or perform 
+        data = request.json
+        tasks = data.get("tasks")
         stripTasks = []
         for i in tasks:
             i = i.replace('Delete Task', '')
             stripTasks.append(i)
-        # print("Modified tasks:", stripTasks)
-        query_result = generate_scheduling_query(stripTasks)
-        content = query_result.text
-        content = '\n'.join([line for line in content.split('\n') if line.strip()])
-        # print(content)
+        query_result = generate_scheduling_query(stripTasks).text
+        # print(query_result)
+        query_result = '\n'.join([line for line in query_result.split('\n') if line.strip()])
         
         x = 0
-        lines = content.split('\n')
+        lines = query_result.split('\n')
         schedule = []
-        # print(len(lines))
-        # print(lines)
+        
+        print(len(lines))
+        print(lines)
+        
+        if lines[0].startswith('task'):
+            start_index = 0
+        else:
+            start_index = 1
 
-        for x in range(0, len(lines)-2, 3):
+        for x in range(start_index, len(lines)-2, 3):
             if lines[x] == '': continue
             else:
-                task_info ={
-                    "task": lines[x].split(" = ")[1].strip("'"),
-                    "start_time": lines[x+1].split(" = ")[1].strip("'").strip("\"") + ":00",
-                    "end_time": lines[x+2].split(" = ")[1].strip("'").strip("\"") + ":00"
+                print(lines[x])
+                meep = lines[x].split(" = ")[1].strip("'")
+                print(meep)
+                meep2 = lines[x+1].split(" = ")[1].strip("'").strip("\"") + ":00"
+                print(meep2)
+                meep3 = lines[x+2].split(" = ")[1].strip("'").strip("\"") + ":00"
+                print(meep3 + "1")
+                task_info = {
+                    "task": meep,
+                    "start_time": meep2,
+                    "end_time": meep3
                 }
                 schedule.append(task_info)
-        # print(schedule)
-
-        
-        #['task = "Wash Car"', 'start_time = "2024-02-11T12:00"', 'end_time = "2024-02-11T13:00"', 'task = "Office Hours"', 'start_time = "2024-02-11T14:00"', 'end_time = "2024-02-11T15:00"', 'task = "Study Math"', 'start_time = "2024-02-11T10:00"', 'end_time = "2024-02-11T11:00"', 'task = "Leetcode Problems"', 'start_time = "2024-02-11T16:00"', 'end_time = "2024-02-11T17:00"', 'task = "Practice Swimming"', 'start_time = "2024-02-11T07:00"', 'end_time = "2024-02-11T08:00"']
-        #[{'task': '"Wash Car"', 'start_time': '"2024-02-11T12:00"', 'end_time': '"2024-02-11T13:00"'}, {'task': '"Office Hours"', 'start_time': '"2024-02-11T14:00"', 'end_time': '"2024-02-11T15:00"'}, {'task': '"Study Math"', 'start_time': '"2024-02-11T10:00"', 'end_time': '"2024-02-11T11:00"'}, {'task': '"Leetcode Problems"', 'start_time': '"2024-02-11T16:00"', 'end_time': '"2024-02-11T17:00"'}, {'task': '"Practice Swimming"', 'start_time': '"2024-02-11T07:00"', 'end_time': '"2024-02-11T08:00"'}]
-        
-        # Construct response message
 
         local_time = dt.datetime.now()
         local_timezone = dt.datetime.now(dt.timezone.utc).astimezone().tzinfo
@@ -407,6 +412,7 @@ def taskschedule():
         creds = None
         if os.path.exists("token.json"):
             creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -421,7 +427,7 @@ def taskschedule():
 
                 with open("token.json", "w") as token:
                     token.write(creds.to_json())
-
+        
         try:
             service = build("calendar", "v3", credentials = creds)
             now = dt.datetime.now().isoformat() + "Z"
@@ -436,32 +442,12 @@ def taskschedule():
                     start = event["start"].get("dateTime", event["start"].get("date"))
                     print(start, event["summary"])
 
-            # event = {
-            #     "summary": "My Python Event",
-            #     "location": "Somewhere Online",
-            #     "description": "",
-            #     "colorId": 6,
-            #     "start": {
-            #         "dateTime": "2024-02-11T09:00:00" + timeZone,
-            #     },
-
-            #     "end": {
-            #         "dateTime": "2024-02-11T17:00:00" + timeZone,
-            #     },
-            # }
-            # time.wait(5)
-
-            # event = service.events().insert(calendarId = "primary", body = event).execute()
-            # print(f"Event Created {event.get('htmlLink')}")
             print(schedule)
             for query in schedule:
                 print(query)
-            #     time.wait(5)
                 taskSummary = query['task']
                 taskStart = query['start_time']
                 taskEnd = query['end_time']
-                
-            #     # Add time zone offset to date-time strings (assuming they're in ET
                 
                 event = {
                     "summary": taskSummary,
@@ -470,22 +456,15 @@ def taskschedule():
                     "colorId": 6,
                     "start": {
                         "dateTime": taskStart + timeZone,
-                        # "timeZone": "Eastern Time"
                     },
 
                     "end": {
                         "dateTime": taskEnd + timeZone,
-                        # "timeZone": "Eastern Time"
                     },
-                    # "recurrence": [
-                    #     "RRULE: FREQ=DAILY;COUNT=3"
-                    # ],
-                    # "attendees": [
-                    #     {"email": "social@neuralnine.com"},
-                    #     {"email": "pedropa828@gmail.com"},
-                    # ]
                 }
-
+                
+                # Update the event description with ranked keywords
+                event['description'] = f"Ranked Keywords: {event['summary']}"
 
                 event = service.events().insert(calendarId = "primary", body = event).execute()
                 print(f"Event Created {event.get('htmlLink')}")
@@ -494,17 +473,11 @@ def taskschedule():
         except HttpError as error:
             print("An error occurred:", error)
         response = {
-            "content": content
+            "content": query_result
         }
-        #print(content)
-       # successString = "Tasks Successfully Added to Calendar"
         return jsonify({"message": "Tasks Successfully Added to Calendar"})    
     else:
         return render_template("taskschedule.html")
-    
-@app.route("/education")
-def education():
-    return render_template("education.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
