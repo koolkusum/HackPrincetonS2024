@@ -4,7 +4,6 @@
     border: none;
     outline: none;
     box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
 }
 
 body {
@@ -34,7 +33,7 @@ body {
 }
 
 .messages {
-    height: 750px;
+    height: 38vw;
     overflow-y: scroll;
     margin-bottom: 20px;
 }
