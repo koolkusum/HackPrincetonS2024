@@ -201,6 +201,7 @@ def upload():
             destination_path = os.path.abspath('./static/uploads/lecture1.pdf')
 
             copy_file(source_path, destination_path)
+            print(filename)
             session['current_filename'] = filename
             session['current_pdf'] = True
             
