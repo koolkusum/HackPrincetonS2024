@@ -7,20 +7,20 @@
     <link rel="icon" type="image/png" href="/static/images/icon.png">
     <link rel="stylesheet" href="../static/styles.css">
     <script type="module" src="https://unpkg.com/@splinetool/viewer@1.0.54/build/spline-viewer.js"></script>
-
+    
     <title></title>
 </head>
-<body>
+<body style="overflow: hidden;">
     <div class="container">
         <div class="content">
-            <h1>NewLeaf</h1>
-            <p>Grow, Learn, Succeed with NewLeaf!</p>
+            <img class="rounded-5 ms-3" src="{{ url_for('static', filename='Images/assets/logo.png') }}" alt="Logo" width="20%" height="20%" style="border-radius: 50%;">
+            <p>Grow a new leaf to learn and succeed!</p>
             <br>
             <a href="/login" class="signin-link">
                 <button class="button-81" role="button">Get Started</button>
             </a>
         </div>
-        <spline-viewer loading-anim-type="spinner-small-dark" url="https://prod.spline.design/gyTB2q3mOM1sUfoE/scene.splinecode"></spline-viewer>
+        <spline-viewer loading-anim-type="spinner-small-dark" url="https://prod.spline.design/gyTB2q3mOM1sUfoE/scene.splinecode" ></spline-viewer>
     </div>
 </body>
 </html>
