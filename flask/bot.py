@@ -1,4 +1,4 @@
-# https://discord.com/oauth2/authorize?client_id=1223585350467719198&permissions=21983791152192&scope=bot
+# https://discord.com/oauth2/authorize?client_id=1223858001392177243&permissions=21983791152192&scope=bot
 
 import discord
 from discord.ext import commands
