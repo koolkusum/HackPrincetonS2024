@@ -28,13 +28,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-<<<<<<< HEAD
 from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials, parse_datetime_to_day_number, parse_event_details
 
 SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations', 'https://www.googleapis.com/auth/documents']
-=======
-SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
->>>>>>> ed523345893b1b07ff9bd3c86e8244a31bd58c40
 
 app = Flask(__name__)
 app.secret_key = urandom(24)
@@ -486,11 +482,8 @@ def rank_keywords():
     response = result.text.split(':', 1)[-1].strip()
     print(response)
 
-<<<<<<< HEAD
     # Return the ranked keywords as JSON
     return jsonify({'keywords': response})
 
-=======
->>>>>>> ed523345893b1b07ff9bd3c86e8244a31bd58c40
 if __name__ == "__main__":
     app.run(debug=True)
