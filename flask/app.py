@@ -82,11 +82,9 @@ def logout():
     # Clear token.json and credentials.json if they exist
     if os.path.exists('token.json'):
         os.remove('token.json')
-    if os.path.exists('credentials.json'):
-        os.remove('credentials.json')
     
     # Redirect to the main page or any desired page after logout
-    return redirect(url_for('/'))
+    return redirect(url_for('mainpage'))
 
 # Function to retrieve client information from Auth0
 def get_auth0_client_info():
