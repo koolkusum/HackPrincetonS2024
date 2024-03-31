@@ -250,6 +250,29 @@ def upload():
             print(filename)
             session['current_filename'] = filename
             session['current_pdf'] = True
+            
+            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
+            service = build("docs", "v1", credentials=creds)
+            doc = {
+                'title': 'Summarized Text Document'
+            }
+            doc = service.documents().create(body=doc).execute()
+            doc_id = doc.get('documentId')
+
+            requests = [
+                {
+                    'insertText': {
+                        'location': {
+                            'index': 1,
+                        },
+                        'text': result.text,
+                    }
+                }
+            ]
+            result = service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
+
+            doc_url = f"https://docs.google.com/document/d/{doc_id}"
 
             return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, filename=filename)
 
