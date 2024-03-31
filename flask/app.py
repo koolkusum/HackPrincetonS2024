@@ -17,7 +17,7 @@ from datetime import date, datetime, timedelta, timezone
 import datetime as dt
 from authlib.integrations.flask_client import OAuth
 import uuid
-
+import subprocess
 
 import google.generativeai as genai
 from google.auth import load_credentials_from_file
@@ -234,12 +234,22 @@ def upload():
             # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print(filepath)
-
+            filepath = filepath.replace('\\','/')
             pdf_file.save(filepath)
-            session['current_filename'] = filename  # Save the current filename in the session
+            def copy_file(source_path, destination_path):
+                try:
+                    subprocess.run(['copy', source_path, destination_path], shell=True)
+                    print(f"File copied from {source_path} to {destination_path} successfully.")
+                except Exception as e:
+                    print(f"Error occurred: {str(e)}")
 
-            # Set the current_pdf variable to True to indicate that a PDF has been uploaded
+            # Example usage:
+            source_path = os.path.abspath('./static/lecture1.pdf')
+            destination_path = os.path.abspath('./static/uploads/lecture1.pdf')
+
+            copy_file(source_path, destination_path)
+            print(filename)
+            session['current_filename'] = filename
             session['current_pdf'] = True
 
             return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, filename=filename)
