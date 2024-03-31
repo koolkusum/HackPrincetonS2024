@@ -1,17 +1,16 @@
 // Text for typing animation
 const textToType = [
-  "Innovative engineers who push the boundaries of technology and design.",
-  "Groundbreaking scientists whose research drives progress and discovery.",
-  "Inspiring leaders who break through barriers and pave the way for future generations.",
-  "Creative problem solvers who tackle complex challenges with ingenuity and determination.",
-  "Passionate educators who ignite curiosity and foster a love for learning in STEM fields.",
-  "Dedicated researchers who explore the unknown and uncover solutions to global problems.",
-  "Visionary entrepreneurs who turn ideas into reality and drive economic growth.",
-  "Collaborative team players who thrive in interdisciplinary environments and drive innovation forward.",
-  "Adaptive thinkers who embrace change and adapt to new technologies and methodologies.",
-  "Trailblazing pioneers who shatter stereotypes and redefine what it means to be a woman in STEM.",
-  "Empathetic engineers who design solutions with a focus on inclusivity and accessibility.",
-  "Fearless explorers who venture into uncharted territories and expand the boundaries of human knowledge.",
+  "Establish a consistent study routine to develop a habit of learning.",
+  "Break down complex concepts into smaller, manageable chunks for better understanding.",  
+  "Utilize active learning techniques such as summarizing, teaching others, and self-testing.",
+  "Create organized notes using bullet points, diagrams, and color-coding for clarity.",
+  "Set specific, achievable goals to stay motivated and track progress.",
+  "Prioritize tasks by importance and urgency to manage time effectively.",
+  "Seek clarification from teachers or peers when encountering difficulties.",
+  "Take regular breaks during study sessions to maintain focus and prevent burnout.",
+  "Practice retrieval exercises like flashcards or quizzes to reinforce learning.",
+  "Review previous material periodically to strengthen retention and build connections.",
+  "Stay curious and cultivate a growth mindset, embracing challenges as opportunities for growth."
 ];
 
 
