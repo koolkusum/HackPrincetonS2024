@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 
 
 # Third-Party Imports
-from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
+from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, Response
 from datetime import datetime, timezone
 import datetime as dt
 from authlib.integrations.flask_client import OAuth
@@ -47,6 +47,7 @@ oauth.register(
 )
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 
 def get_db():
@@ -274,7 +275,7 @@ def generate_scheduling_query(tasks):
     All tasks should be scheduled on the same day, unless a user specifies otherwise in their request.
     Task Description: Provide a brief description of the task or event. For example:
 
-    Task Description: "Meeting with client"
+    Task Description: Meeting with client
     Scheduling Parameters: Consider the user's work-life balance and aim to schedule the event at an appropriate time. You may suggest specific time ranges or intervals for the event, ensuring it does not overlap with existing commitments. For instance:
     
     Start time: "YYYY-MM-DDTHH:MM"
@@ -300,6 +301,34 @@ def generate_scheduling_query(tasks):
     model = genai.GenerativeModel('models/gemini-pro')
     result = model.generate_content(query + taskss)
     return result
+
+video_playing = False
+
+@app.route("/")
+def mainpage():
+    return render_template("index.html", video_playing=video_playing)
+
+# Route to start the video feed
+@app.route('/start_video', methods=['POST'])
+def start_video():
+    global video_playing
+    video_playing = True
+    return 'Video started'
+
+# Generator function for the video frames
+def gen_frames():
+    while True:
+        if video_playing:
+            # Generate video frames here
+            yield frame  # Replace `frame` with the actual video frame
+        else:
+            # Return an empty frame if video is not playing
+            yield b''
+
+# Route to provide video feed
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route("/taskschedule", methods=["GET", "POST"])
 def taskschedule():
@@ -381,32 +410,14 @@ def taskschedule():
                     start = event["start"].get("dateTime", event["start"].get("date"))
                     print(start, event["summary"])
 
-            # event = {
-            #     "summary": "My Python Event",
-            #     "location": "Somewhere Online",
-            #     "description": "",
-            #     "colorId": 6,
-            #     "start": {
-            #         "dateTime": "2024-02-11T09:00:00" + timeZone,
-            #     },
-
-            #     "end": {
-            #         "dateTime": "2024-02-11T17:00:00" + timeZone,
-            #     },
-            # }
-            # time.wait(5)
-
-            # event = service.events().insert(calendarId = "primary", body = event).execute()
-            # print(f"Event Created {event.get('htmlLink')}")
             print(schedule)
             for query in schedule:
                 print(query)
-            #     time.wait(5)
-                taskSummary = query['task']
+                taskSummary = query['task'].replace('"', '')
+                print(taskSummary)
                 taskStart = query['start_time']
                 taskEnd = query['end_time']
                 
-            #     # Add time zone offset to date-time strings (assuming they're in ET
                 
                 event = {
                     "summary": taskSummary,
@@ -415,20 +426,11 @@ def taskschedule():
                     "colorId": 6,
                     "start": {
                         "dateTime": taskStart + timeZone,
-                        # "timeZone": "Eastern Time"
                     },
 
                     "end": {
                         "dateTime": taskEnd + timeZone,
-                        # "timeZone": "Eastern Time"
                     },
-                    # "recurrence": [
-                    #     "RRULE: FREQ=DAILY;COUNT=3"
-                    # ],
-                    # "attendees": [
-                    #     {"email": "social@neuralnine.com"},
-                    #     {"email": "pedropa828@gmail.com"},
-                    # ]
                 }
 
 
@@ -441,8 +443,6 @@ def taskschedule():
         response = {
             "content": content
         }
-        #print(content)
-       # successString = "Tasks Successfully Added to Calendar"
         return jsonify({"message": "Tasks Successfully Added to Calendar"})    
     else:
         return render_template("taskschedule.html")

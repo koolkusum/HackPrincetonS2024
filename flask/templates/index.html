@@ -1,17 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Feed</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Video Feed</h1>
+    <button id="startButton">Start Video</button>
 
-
-  <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8  offset-lg-2">
-                <h3 class="mt-5">Live Streaming</h3>
-                <img src="{{ url_for('video_feed') }}" width="50%">
-            </div>
-        </div>
+    <div id="videoContainer">
+        <img id="videoFeed" src="" alt="Video Feed">
     </div>
-    </body>
 
-
+    <script>
+        $(document).ready(function() {
+            $('#startButton').click(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/start_video',
+                    success: function(response) {
+                        console.log(response);
+                        $('#videoFeed').attr('src', '/video_feed');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
 </html>

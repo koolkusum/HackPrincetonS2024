@@ -43,7 +43,7 @@ while True:
     if len(fingers) >= 3:
         if fingers[1] and fingers[2]:
             xp, yp = 0, 0
-            print("Selection Mode")
+            #print("Selection Mode")
             if y1 < 125:
                 if 250 < x1 < 450:
                     header = overlayList[0]
