@@ -30,7 +30,7 @@ from googleapiclient.errors import HttpError
 
 from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials, parse_datetime_to_day_number, parse_event_details
 
-SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
+SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations', 'https://www.googleapis.com/auth/documents']
 
 app = Flask(__name__)
 app.secret_key = urandom(24)
@@ -216,6 +216,32 @@ def upload():
 
             # Set the current_pdf variable to True to indicate that a PDF has been uploaded
             session['current_pdf'] = True
+            
+            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
+            service = build("docs", "v1", credentials=creds)
+                    # Create a new Google Doc
+            doc = {
+                'title': 'Summarized Text Document'
+            }
+            doc = service.documents().create(body=doc).execute()
+            doc_id = doc.get('documentId')
+
+            requests = [
+                {
+                    'insertText': {
+                        'location': {
+                            'index': 1,
+                        },
+                        'text': result.text,
+                    }
+                }
+            ]
+            result = service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
+
+            # Get the URL of the created Google Doc
+            doc_url = f"https://docs.google.com/document/d/{doc_id}"
+
 
             return render_template("upload.html", formatted_message=formatted_message, current_pdf=True, filename=filename)
 
