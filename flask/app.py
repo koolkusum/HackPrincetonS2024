@@ -9,7 +9,7 @@ import requests
 from flask import send_file
 from flask import send_from_directory
 from werkzeug.utils import secure_filename
-
+from calendarprogram import addSchedule
 
 # Third-Party Imports
 from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
@@ -141,7 +141,7 @@ def authorized():
     
     global user_logged_in
     user_logged_in = True
-    return redirect(url_for('chatbot'))
+    return redirect(url_for('education'))
 
 @app.route("/chatbot", methods=["GET", "POST"])
 def chatbot():
@@ -545,6 +545,33 @@ def rank_keywords():
 
     # Return the ranked keywords as JSON
     return jsonify({'keywords': response})
+
+@app.route('/events', methods=["GET", "POST"])
+def events():
+    if request.method == "POST":
+        name = request.json.get('name')
+        description = request.json.get('description')
+        location = request.json.get('location')
+        date = request.json.get('date')
+        startTime = request.json.get('startTime')
+        endTime = request.json.get('endTime')
+        timezone = request.json.get('timezone')
+        print(f'name {name}')
+        print(f'Description: {description}')
+        print(f'Location: {location}')
+        print(f'Date: {date}')
+        print(f'Start Time: {startTime}')
+        print(f'End Time: {endTime}')
+        print(f'Timezone: {timezone}')
+        if name:
+            # Process the event name as needed (e.g., save to database)
+            print("Attending event:", name)
+            addSchedule(name, description, location, date, startTime, endTime)
+            return {"message": f"Attending event: {name}"}, 200
+        else:
+            return {"error": "Event name not provided in request body"},
+    else:
+       return render_template("events.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
