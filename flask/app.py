@@ -512,10 +512,9 @@ def taskschedule():
     else:
         return render_template("taskschedule.html")
     
-@app.route("/cal")
-def cal():
-    return render_template("cal.html")
-
+@app.route("/education")
+def education():
+    return render_template("education.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
