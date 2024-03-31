@@ -4,41 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload PDF</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .summary-box {
+            max-height: 600px; /* Adjust the height as needed */
+            overflow-y: auto;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload a PDF</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="pdf_file" accept=".pdf" required>
-        <button type="submit">Upload</button>
-    </form>
-    {% if current_pdf %}
-    <h2>Uploaded PDF</h2>
-    <iframe src="{{ url_for('show_pdf') }}" width="800" height="600"></iframe>
-    {% endif %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Upload a PDF</h1>
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" name="pdf_file" accept=".pdf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+                {% if formatted_message %}
+                <div class="summary-box">
+                    <h2>Summarization:</h2>
+                    <p>{{ formatted_message | safe }}</p>
+                </div>
+                <!-- Bootstrap Audio Player -->
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {% if current_pdf %}
+                <h2>Uploaded PDF</h2>
+                <iframe src="{{ url_for('show_pdf') }}" class="embed-responsive" width="800" height="600"></iframe>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-    {% if formatted_message %}
-    <h2>Summarization:</h2>
-    <p>{{ formatted_message | safe }}</p>
-    <button id="play-button">Play Summary</button>
-    {% endif %}
-
-    <!-- JavaScript for speech synthesis -->
-    <script>
-        // Function to speak the formatted text
-        function speakText() {
-            var text = "{{ formatted_message }}"; // Retrieve the formatted text from the template
-            var speech = new SpeechSynthesisUtterance(text);
-            speech.lang = 'en-US'; // Set language to English (United States)
-            speech.volume = 1; // Set volume (0 to 1)
-            speech.rate = 1; // Set rate (0.1 to 10)
-            speech.pitch = 1; // Set pitch (0 to 2)
-            speechSynthesis.speak(speech);
-        }
-
-        // Event listener for the play button
-        document.getElementById('play-button').addEventListener('click', function() {
-            speakText();
-        });
-    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
