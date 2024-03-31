@@ -547,7 +547,7 @@ def rank_keywords():
     return jsonify({'keywords': response})
 
 @app.route('/events', methods=["GET", "POST"])
-def prodev():
+def events():
     if request.method == "POST":
         name = request.json.get('name')
         description = request.json.get('description')
