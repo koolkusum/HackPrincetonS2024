@@ -62,7 +62,7 @@ while True:
     if len(fingers) >= 2:
         if fingers[1] and not fingers[2]:
             cv2.circle(img, (x1, y1), 15, drawColor, cv2.FILLED)
-            print("Drawing Mode")
+            #print("Drawing Mode")
             if xp == 0 and yp == 0:
                 xp, yp = x1, y1
             
