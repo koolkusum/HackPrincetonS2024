@@ -13,7 +13,9 @@ body {
 
 .header--title {
     color: black;
-    text-align: center;   
+    text-align: center; 
+    text-decoration: bold;   
+    font-weight: bold;
 }
 
 .main-content {
