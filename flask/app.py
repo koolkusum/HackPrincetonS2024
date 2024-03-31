@@ -177,7 +177,7 @@ def upload():
             result = model.generate_content(query)
             formatted_message = ""
             lines = result.text.split("\n")
-            print(result.text)
+            # print(result.text)
             for line in lines:
                 bold_text = ""
                 while "**" in line:
@@ -186,12 +186,13 @@ def upload():
                     bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
                     line = line[:start_index] + bold_text + line[end_index + 2:]
                 formatted_message += line + "<br>"
-            print(formatted_message)
+            # print(formatted_message)
             # Save the uploaded PDF temporarily
             filename = secure_filename(pdf_file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             filepath = filepath.replace('\\','/')
-            pdf_file.save(filepath)
+            print(filepath)
+            # pdf_file.save(filepath)
             def copy_file(source_path, destination_path):
                 try:
                     subprocess.run(['copy', source_path, destination_path], shell=True)
@@ -200,8 +201,8 @@ def upload():
                     print(f"Error occurred: {str(e)}")
 
             # Example usage:
-            source_path = os.path.abspath('./static/lecture1.pdf')
-            destination_path = os.path.abspath('./static/uploads/lecture1.pdf')
+            source_path = os.path.abspath(f'./static/{filename}')
+            destination_path = os.path.abspath(f'./static/{filepath}')
 
             copy_file(source_path, destination_path)
             print(filename)
