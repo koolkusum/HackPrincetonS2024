@@ -1,3 +1,4 @@
+@import url('..static/color.css');
 /* Basic Styles */
 .bg-purple {
   background-color: #6f42c1;
@@ -20,7 +21,7 @@
   z-index: -1;
   opacity: 0.6; /* Adjust opacity as needed */
   pointer-events: none;
-  background: linear-gradient(45deg, #2ecc71, #27ae60, #2ecc71, #27ae60);
+  background: linear-gradient(45deg, #06f76b, #27ae60, #2ecc71, #5bb016);
   background-size: 400% 400%;
   animation: gradientAnimation 10s ease infinite;
 }
