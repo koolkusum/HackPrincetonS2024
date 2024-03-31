@@ -3,6 +3,8 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
+from datetime import datetime
+
 import os
 
 # If modifying these scopes, delete the file token.json.
@@ -68,9 +70,18 @@ def delete_calendar_event(event_id, start_time_str):
 
 def convert_to_iso8601(start_time_str):
     try:
-        start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M:%S%z")
+        start_time = datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M:%S%z")
         return start_time.isoformat()
     except ValueError:
         return None
 
+from datetime import datetime
 
+def parse_datetime_to_day_number(datetime_str):
+    # Parse the datetime string into a datetime object
+    datetime_obj = datetime.strptime(datetime_str.split(' - ')[0], '%Y-%m-%dT%H:%M:%S%z')
+
+    # Get the day number from the datetime object
+    day_number = datetime_obj.day
+
+    return day_number

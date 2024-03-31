@@ -21,9 +21,10 @@
       {% for column in range(1, 8) %}
       <div class="col-lg">
         {% for event in events[column - 1] %}
+        {% if event.day == days_with_number[column-1][1] %}
         <div class="card mb-3">
           <div class="card-body text-center">
-            <p class="card-text">{{ event.details }}</p>
+            <p class="card-text">{{ event.details }}{{event.day}}</p>
             <button
               type="button"
               class="btn btn-danger float-end"
@@ -31,6 +32,7 @@
             ></button>
           </div>
         </div>
+        {% endif %}
         {% endfor %}
       </div>
       {% endfor %}

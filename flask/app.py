@@ -28,7 +28,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials
+from calendarinter import convert_to_iso8601, delete_calendar_event, get_credentials, parse_datetime_to_day_number
 
 SCOPES = ['https://www.googleapis.com/auth/calendar',  'https://www.googleapis.com/auth/presentations']
 
@@ -226,8 +226,6 @@ def extract_text_from_pdf(pdf_file):
         text += pdf_reader.pages[page_num].extract_text()
     return text
 
-from datetime import date, timedelta
-
 @app.route("/dashboard/")
 def dashboard():
     creds = get_credentials()
@@ -252,7 +250,10 @@ def dashboard():
         items = event_result.get("items", [])
         for event in items:
             start = event["start"].get("dateTime", event["start"].get("date"))
-            events[i].append({"id": event["id"], "details": f"{start} - {event['summary']}"})
+            day = reordered_weekdays[i]  # Get the corresponding day for the event
+            event_details = f"{start} - {event['summary']}"  # Append day to event details
+            day_number = parse_datetime_to_day_number(event_details)  # Get the day number
+            events[i].append({"id": event["id"], "details": event_details, "day": day_number})
 
     days_with_number = [(reordered_weekdays[i], (today + timedelta(days=i)).day) for i in range(7)]
 
