@@ -1,14 +1,52 @@
 import discord
 from discord.ext import commands
-import os
-from dotenv import load_dotenv
-import asyncio
+import json
+from os import path, urandom
 import random
-import datetime
+from dotenv import load_dotenv
+import os.path
+import PyPDF2
+import pymongo
+import requests
+from flask import send_file
+from flask import send_from_directory
+from werkzeug.utils import secure_filename
+import asyncio
+
+# Third-Party Imports
+from flask import Flask, jsonify, render_template, redirect, request, session, url_for, g, session
+from datetime import date, datetime, timedelta, timezone
+import datetime as dt
+from authlib.integrations.flask_client import OAuth
+import uuid
+import subprocess
+
+import google.generativeai as genai
+from google.auth import load_credentials_from_file
+from google.oauth2 import credentials
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google.generativeai import generative_models
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 from user import User, UserDatabase
 
 pomodoro_running = True
+
+genai_client = None
+SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+
+try:
+    api_key = os.getenv("GENAI_API_KEY")
+    if api_key:
+        genai_client = generative_models.GenerativeModelsServiceClient(api_key=api_key)
+    else:
+        print("GENAI_API_KEY environment variable is not set.")
+except Exception as e:
+    print("Error initializing GenAI client:", e)
 
 async def hello(message : discord.message.Message):
     options = ["Hi ", "Hey ", "Hello ", "Howdy ", "Hi there ", "Greetings ", "Aloha ", "Bonjour ", "Ciao ", "Hola ", "How's it going? ", "Howdy-do ", "Good day ", "Wassup ", "What's popping? ", "What's up? ", "Hiya ", "What's new? ", "How are you? "]
@@ -22,9 +60,53 @@ async def hello(message : discord.message.Message):
     embed = discord.Embed(title = chosen_string, description=string, color=0xFF5733)
     file = discord.File('static/Images/icon.png', filename='icon.png')
     embed.set_thumbnail(url='attachment://icon.png')
-    embed.set_author(name="HackPrinceton2024-Bot says:")
+    embed.set_author(name="Leafy-Bot says:")
     embed.set_footer(text="!hello")
     await message.channel.send(file=file, embed=embed)
+
+# async def chatbot(message : discord.message.Message, client: discord.Client):
+#     model = genai.GenerativeModel('models/gemini-pro')
+#     embed = discord.Embed(title = "Talk to Gemini API", description="Enter what you want to say!", color=0xFF5733)
+#     file = discord.File('static/Images/icon.png', filename='icon.png')
+#     embed.set_thumbnail(url='attachment://icon.png')
+#     embed.set_author(name="Leafy-Bot says:")
+#     embed.set_footer(text="!chatbot")
+#     await message.channel.send(file=file, embed=embed)
+
+#     def check(m):
+#         return m.author == message.author and m.channel == message.channel
+#     chatbot_query = await client.wait_for('message', check=check, timeout=30)
+#     try:
+#         if chatbot_query.content != "":
+#             result = model.generate_content("hello!")
+#             print(result)
+
+#             lines = result.text.split("\n")
+#             formatted_message = ""
+#             for line in lines:
+#                 bold_text = ""
+#                 while "**" in line:
+#                     start_index = line.index("**")
+#                     end_index = line.index("**", start_index + 2)
+#                     bold_text += "<strong>" + line[start_index + 2:end_index] + "</strong>"
+#                     line = line[:start_index] + bold_text + line[end_index + 2:]
+#                 formatted_message += line + "<br>"
+
+#             string = f''
+#             embed = discord.Embed(title = "Talk to Gemini API", description=formatted_message, color=0xFF5733)
+#             file = discord.File('static/Images/icon.png', filename='icon.png')
+#             embed.set_thumbnail(url='attachment://icon.png')
+#             embed.set_author(name="Leafy-Bot says:")
+#             embed.set_footer(text="!chatbot")
+#             await message.channel.send(file=file, embed=embed)
+#     except asyncio.TimeoutError:
+#         string = f'{message.author.mention} has taken too long to respond.'
+#         embed = discord.Embed(title= "Timeout Error", description=string, color=0xFF5733)
+#         file = discord.File('static/Images/icon.png', filename='icon.png')
+#         embed.set_thumbnail(url='attachment://icon.png')
+#         embed.set_author(name="Leafy-Bot says:")
+#         embed.set_footer(text="!adduser")
+        # await message.channel.send(file=file, embed=embed)
 
 async def time(message : discord.message.Message):
     date = datetime.datetime.now()
@@ -39,7 +121,7 @@ async def time(message : discord.message.Message):
     embed = discord.Embed(title=result_string, color=0xFF5733)
     file = discord.File('static/Images/icon.png', filename='icon.png')
     embed.set_thumbnail(url='attachment://icon.png')
-    embed.set_author(name="HackPrinceton2024-Bot says:")
+    embed.set_author(name="Leafy-Bot says:")
     embed.set_footer(text="!time")
     await message.channel.send(file=file, embed=embed)
 
@@ -49,7 +131,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
     embed = discord.Embed(title=result_string, description=help_description, color=0xFF5733)
     file = discord.File('static/Images/icon.png', filename='icon.png')
     embed.set_thumbnail(url='attachment://icon.png')
-    embed.set_author(name="HackPrinceton2024-Bot says:")
+    embed.set_author(name="Leafy-Bot says:")
     embed.set_footer(text="!pomodoro")
     await message.channel.send(file=file, embed=embed)
     def check(m):
@@ -62,7 +144,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
             embed = discord.Embed(title=result_title, description=result_description, color=0xFF5733)
             file = discord.File('static/Images/icon.png', filename='icon.png')
             embed.set_thumbnail(url='attachment://icon.png')
-            embed.set_author(name="HackPrinceton2024-Bot says:")
+            embed.set_author(name="Leafy-Bot says:")
             embed.set_footer(text="!pomodoro")
             await message.channel.send(file=file, embed=embed)
             return        
@@ -71,7 +153,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
         embed = discord.Embed(title= "Timeout Error", description=string, color=0xFF5733)
         file = discord.File('static/Images/icon.png', filename='icon.png')
         embed.set_thumbnail(url='attachment://icon.png')
-        embed.set_author(name="HackPrinceton2024-Bot says:")
+        embed.set_author(name="Leafy-Bot says:")
         embed.set_footer(text="!adduser")
         await message.channel.send(file=file, embed=embed)
     result_string = f'Enter Break Time'
@@ -79,7 +161,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
     embed = discord.Embed(title=result_string, description=help_description, color=0xFF5733)
     file = discord.File('static/Images/icon.png', filename='icon.png')
     embed.set_thumbnail(url='attachment://icon.png')
-    embed.set_author(name="HackPrinceton2024-Bot says:")
+    embed.set_author(name="Leafy-Bot says:")
     embed.set_footer(text="!pomodoro")
     await message.channel.send(file=file, embed=embed)
     def check(m):
@@ -92,7 +174,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
             embed = discord.Embed(title=result_title, description=result_description, color=0xFF5733)
             file = discord.File('static/Images/icon.png', filename='icon.png')
             embed.set_thumbnail(url='attachment://icon.png')
-            embed.set_author(name="HackPrinceton2024-Bot says:")
+            embed.set_author(name="Leafy-Bot says:")
             embed.set_footer(text="!pomodoro")
             await message.channel.send(file=file, embed=embed)
             return        
@@ -101,7 +183,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
         embed = discord.Embed(title= "Timeout Error", description=string, color=0xFF5733)
         file = discord.File('static/Images/icon.png', filename='icon.png')
         embed.set_thumbnail(url='attachment://icon.png')
-        embed.set_author(name="HackPrinceton2024-Bot says:")
+        embed.set_author(name="Leafy-Bot says:")
         embed.set_footer(text="!adduser")
         await message.channel.send(file=file, embed=embed)    
     study_time_content = int(study_time.content)
@@ -115,7 +197,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
         embed = discord.Embed(title=result_title, description=result_description, color=0xFF5733)
         file = discord.File('static/Images/icon.png', filename='icon.png')
         embed.set_thumbnail(url='attachment://icon.png')
-        embed.set_author(name="HackPrinceton2024-Bot says:")
+        embed.set_author(name="Leafy-Bot says:")
         embed.set_footer(text="!pomodoro")
         await message.channel.send(file=file, embed=embed)
         for i in range(study_seconds):
@@ -129,7 +211,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
                     embed = discord.Embed(title=result_title, description=result_description, color=0xFF5733)
                     file = discord.File('static/Images/icon.png', filename='icon.png')
                     embed.set_thumbnail(url='attachment://icon.png')
-                    embed.set_author(name="HackPrinceton2024-Bot says:")
+                    embed.set_author(name="Leafy-Bot says:")
                     embed.set_footer(text="!pomodoro")
                     await message.channel.send(file=file, embed=embed) 
                     return
@@ -141,7 +223,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
         embed = discord.Embed(title=result_title, description=result_description, color=0xFF5733)
         file = discord.File('static/Images/icon.png', filename='icon.png')
         embed.set_thumbnail(url='attachment://icon.png')
-        embed.set_author(name="HackPrinceton2024-Bot says:")
+        embed.set_author(name="Leafy-Bot says:")
         embed.set_footer(text="!pomodoro")
         await message.channel.send(file=file, embed=embed)
         for i in range(break_seconds):
@@ -155,7 +237,7 @@ async def pomodoro(message : discord.message.Message, client: discord.Client):
                     embed = discord.Embed(title=result_title, description=result_description, color=0xFF5733)
                     file = discord.File('static/Images/icon.png', filename='icon.png')
                     embed.set_thumbnail(url='attachment://icon.png')
-                    embed.set_author(name="HackPrinceton2024-Bot says:")
+                    embed.set_author(name="Leafy-Bot says:")
                     embed.set_footer(text="!pomodoro")
                     await message.channel.send(file=file, embed=embed) 
                     return
@@ -168,7 +250,7 @@ async def help(message : discord.message.Message, client : discord.Client):
     embed = discord.Embed(title=result_string, description=help_description, color=0xFF5733)
     file = discord.File('static/Images/icon.png', filename='icon.png')
     embed.set_thumbnail(url='attachment://icon.png')
-    embed.set_author(name="HackPrinceton2024-Bot says:")
+    embed.set_author(name="Leafy-Bot says:")
     embed.add_field(name="!hello", value="returns a friendly greeting!", inline=False)
     embed.add_field(name="!time", value="tells the current time.", inline=False)
     embed.add_field(name="!adduser", value="adds user to the database", inline=False)
@@ -191,7 +273,7 @@ async def invalidInput(message : discord.message.Message, client : discord.Clien
     embed = discord.Embed(title=result_string, description=help_description, color=0xFF5733)
     file = discord.File('static/Images/icon.png', filename='icon.png')
     embed.set_thumbnail(url='attachment://icon.png')
-    embed.set_author(name="HackPrinceton2024-Bot says:")
+    embed.set_author(name="Leafy-Bot says:")
     embed.add_field(name="!hello", value="returns a friendly greeting!", inline=False)
     embed.add_field(name="!time", value="tells the current time.", inline=False)
     embed.add_field(name="!adduser", value="adds user to the database", inline=False)

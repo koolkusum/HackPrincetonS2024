@@ -70,7 +70,7 @@ def run_discord_bot():
                     embed = discord.Embed(title=result_title, description=result_description, color=0xFF5733)
                     file = discord.File('static/Images/icon.png', filename='icon.png')
                     embed.set_thumbnail(url='attachment://icon.png')
-                    embed.set_author(name="HackPrinceton2024-Bot says:")
+                    embed.set_author(name="Leafy-Bot says:")
                     print(len(today_tasks))
                     if len(today_tasks) > 0:
                         for item in sorted_data:
@@ -109,6 +109,8 @@ def run_discord_bot():
             await task_response.completetask(message, client, userDatabase)
         elif message.content == '!pomodoro':
             await regular_response.pomodoro(message, client)
+        # elif message.content == '!chatbot':
+        #     await regular_response.chatbot(message, client)
         elif message.content == '!help':
             await regular_response.help(message, client)
         else:
