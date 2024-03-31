@@ -322,18 +322,21 @@ def generate_scheduling_query(tasks):
     print(current_time_str)
     # Provide the current time to the AI for scheduling tasks
     query = "Today is " + current_time_str + "\n"
-    query += """
-    As an AI, your task is to generate raw parameters for creating a quick Google Calendar event. Your goal is to ensure the best work-life balance for the user, including creating a consistent sleeping schedule. Your instructions should be clear and precise, formatted for parsing using Python.
-        Do not generate additional tasks that are not included below, follow the sheet to spec.
-        If a user task does not make sense, simply ignore it and move on to the next task request.
+    query +=  """
+    As an AI, your task is to generate raw parameters for creating a quick Google Calendar event. 
+    Keep in mind when creating events the times should happen after the given time above unless specified otherwise by the user.
+    Your goal is to ensure the best schedule to priotize sustainable lifestyle for the user. 
+    Your instructions should be clear and precise to the instructions below.
+        INCLUDE ALL TASKS PASSED BY THE USER.
+        Do not generate any text that is NOT the format below. I DO NOT want any leading or trailing comments.
+        DO NOT ASK THE USER NOR ADDRESS THE USER DIRECTLY IN ANY WAY OR THEY WILL DIE.
+        If a task is not given a time, move the times around so they don't overlap, but do not override user specified times.
+        Do not remove items unless they truly are irrelevant.
+        The presence of all tasks will be checked at the end to ensure you are functioning properly. Otherwise, you will be disposed of.
+    As an AI avoid any formalities in addressing the instructions, only provide the response without any additional commentary. Do not provide any review of your performance either.
+        Do not add any additional emojies, or information. This will lead to immediate termination.
     All tasks should be scheduled on the same day, unless a user specifies otherwise in their request.
-    Task Description: Provide a brief description of the task or event. For example:
-
-    Task Description: "Meeting with client"
-    Scheduling Parameters: Consider the user's work-life balance and aim to schedule the event at an appropriate time. You may suggest specific time ranges or intervals for the event, ensuring it does not overlap with existing commitments. For instance:
-    
-    Start time: "YYYY-MM-DDTHH:MM"
-    End time: "YYYY-MM-DDTHH:MM"
+    When setting 'task' do not include the time, that will be it's own parameter.
 
     You are not allowed to break the following formatting:
     task = "task_name"
@@ -346,7 +349,7 @@ def generate_scheduling_query(tasks):
     Avoid scheduling events during the user's designated sleeping hours.
     Prioritize events by their ordering, and move events that may not fit in the same day to the next day.
     Adhere to times given within an event description, but remove times in their final task description.
-    The tasks requested are as follows:\n
+    Please do not add anything beyond above, do not add a trailing or beginning message please.
     """
     taskss =""
     for task in tasks:
@@ -478,6 +481,23 @@ def taskschedule():
         return jsonify({"message": "Tasks Successfully Added to Calendar"})    
     else:
         return render_template("taskschedule.html")
+    
+@app.route("/rank-keywords", methods=["POST"])
+def rank_keywords():
+    data = request.get_json()
+    text = data['text']  # Assuming 'text' contains the input text from the user
+    
+    # Generate content using Gemini
+    query = "You are an A.I. that creates very short image queries using keywords that will correctly represent a given text. If no reasonable query can be deduced from the text, query for abstract images instead. Do not say anything else but the query itself. Do not show any human mannerisms, only produce the result. Do not include any prefixes such as 'Image:' or 'Query:'. Do not use emojis, only words. Not following instructions will lead to termination."
+    model = genai.GenerativeModel('models/gemini-pro')
+    result = model.generate_content(query + " Here is the keywords: " + text) # Pass tasks as a separate argument
+    
+    # Remove words before colon
+    response = result.text.split(':', 1)[-1].strip()
+    print(response)
+
+    # Return the ranked keywords as JSON
+    return jsonify({'keywords': response})
 
 if __name__ == "__main__":
     app.run(debug=True)
