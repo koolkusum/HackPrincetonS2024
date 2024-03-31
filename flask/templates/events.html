@@ -15,8 +15,9 @@
         /* Additional styling for the content */
         .container {
             background-color: rgba(255, 255, 255, 0.8); /* Adjust opacity as needed */
-            padding: 20px;
+            padding: 180px;
             border-radius: 10px;
+            padding-bottom: 140px;
         }
 
         .card {
@@ -110,7 +111,8 @@
                         <div class="card-body">
                             <h5 class="card-title">${event.title}</h5>
                             <p class="card-text">${event.description}</p>
-                            <button class="btn btn-primary" onclick="attendEvent('${event.title}', '${event.description}', '${event.location}', '${event.date}', '${event.startTime}', '${event.endTime}', '${event.timezone}')">Attend Event</button>
+                            <button class="btn btn-primary" style="background-color: green;" onclick="attendEvent('${event.title}', '${event.description}', '${event.location}', '${event.date}', '${event.startTime}', '${event.endTime}', '${event.timezone}')">Attend Event</button>
+
                         </div>
                     </div>
                 `;
