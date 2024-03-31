@@ -1,4 +1,5 @@
-from os import urandom
+import json
+from os import path, urandom
 import random
 from dotenv import load_dotenv
 import os.path
@@ -87,16 +88,40 @@ def logout():
     # Redirect to the main page or any desired page after logout
     return redirect(url_for('/'))
 
+# Function to retrieve client information from Auth0
+def get_auth0_client_info():
+    # Make a GET request to the Auth0 API endpoint
+    response = requests.get(AUTH0_API_ENDPOINT)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        auth0_info = response.json()
+        return auth0_info
+    else:
+        # Handle the case when the request fails
+        raise Exception(f"Failed to retrieve Auth0 client info: {response.status_code} - {response.text}")
+
 @app.route('/authorized')
 def authorized():
-    # token = oauth.oauthApp.
-    # oauth_token = token['access_token']
-    # session['oauth_token'] = oauth_token
-    # token = {
-    #     "token": session['oauth_token']
-    # }
-    # with open('token.json', 'w') as file:
-    #     file.write(json.dumps(token))
+    token = oauth.oauthApp.authorize_access_token()
+    oauth_token = token['access_token']
+    session['oauth_token'] = oauth_token
+
+    # Check if credentials.json exists, if not, create it
+    if not path.exists("credentials.json"):
+        # Construct credentials dictionary
+        credentials = {
+            "client_id": re,
+            "client_secret": 'YOUR_CLIENT_SECRET',
+            "auth_uri": 'YOUR_AUTH_URI',
+            "token_uri": 'YOUR_TOKEN_URI',
+            "auth_provider_x509_cert_url": 'YOUR_AUTH_PROVIDER_CERT_URL'
+        }
+
+        # Write credentials to credentials.json
+        with open('credentials.json', 'w') as file:
+            json.dump(credentials, file)
+            
     creds = None
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
